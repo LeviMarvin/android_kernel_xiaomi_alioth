@@ -2062,10 +2062,8 @@ static int push_dl_task(struct rq *rq)
 		return 0;
 
 retry:
-	if (unlikely(next_task == rq->curr)) {
-		WARN_ON(1);
+	if (WARN_ON(next_task == rq->curr))
 		return 0;
-	}
 
 	/*
 	 * If next_task preempts rq->curr, and rq->curr
