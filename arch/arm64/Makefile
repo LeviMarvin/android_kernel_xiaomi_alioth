@@ -49,12 +49,7 @@ $(warning Detected assembler with broken .inst; disassembly will be unreliable)
   endif
 endif
 
-ifeq ($(cc-name),clang)
-KBUILD_CFLAGS	+= -mno-implicit-float
-else
-KBUILD_CFLAGS	+= -mgeneral-regs-only
-endif
-KBUILD_CFLAGS	+= $(lseinstr) $(brokengasinst) $(compat_vdso)
+KBUILD_CFLAGS	+= -mgeneral-regs-only $(lseinstr) $(brokengasinst) $(compat_vdso)
 
 ifeq ($(CONFIG_ARCH_KONA), y)
 ifeq ($(cc-name),clang)
