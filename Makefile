@@ -630,8 +630,18 @@ endif
 ifdef CONFIG_LTO_CLANG
 # use llvm-ar for building symbol tables from IR files, and llvm-nm instead
 # of objdump for processing symbol versions and exports
+ifneq ($(findstring llvm-ar,$(AR)),)
+LLVM_AR		:= $(AR)
+else
 LLVM_AR		:= llvm-ar
+endif
+
+ifneq ($(findstring llvm-nm,$(NM)),)
+LLVM_NM		:= $(NM)
+else
 LLVM_NM		:= llvm-nm
+endif
+
 export LLVM_AR LLVM_NM
 
 # Set O3 optimization level for LTO
