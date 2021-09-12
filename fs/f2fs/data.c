@@ -33,12 +33,6 @@ static struct kmem_cache *bio_entry_slab;
 static mempool_t *bio_post_read_ctx_pool;
 static struct bio_set f2fs_bioset;
 
-#ifdef CONFIG_F2FS_IOSTAT_IO_LATENCY
-#define NUM_PREALLOC_IOSTAT_CTXS	128
-static struct kmem_cache *bio_iostat_ctx_cache;
-static mempool_t *bio_iostat_ctx_pool;
-#endif
-
 #define	F2FS_BIO_POOL_SIZE	NR_CURSEG_TYPE
 
 int __init f2fs_init_bioset(void)
@@ -272,68 +266,11 @@ static void f2fs_post_read_work(struct work_struct *work)
 	f2fs_verify_and_finish_bio(ctx->bio);
 }
 
-#ifdef CONFIG_F2FS_IOSTAT_IO_LATENCY
-static inline void __update_and_unbind_iostat_ctx(struct bio *bio, int rw)
-{
-	struct bio_iostat_ctx *iostat_ctx = bio->bi_private;
-	int sync = bio->bi_opf & REQ_SYNC ? 0 : 1;
-
-	if (rw == 0)
-		bio->bi_private = iostat_ctx->post_read_ctx;
-	else
-		bio->bi_private = iostat_ctx->sbi;
-	__update_iostat_latency(iostat_ctx, rw, sync);
-	mempool_free(iostat_ctx, bio_iostat_ctx_pool);
-}
-
-static inline void __alloc_and_bind_iostat_ctx(struct f2fs_sb_info *sbi,
-		struct bio *bio, struct bio_post_read_ctx *ctx)
-{
-	struct bio_iostat_ctx *iostat_ctx;
-	/* Due to the mempool, this never fails. */
-	iostat_ctx = mempool_alloc(bio_iostat_ctx_pool, GFP_NOFS);
-	iostat_ctx->sbi = sbi;
-	iostat_ctx->submit_ts = 0;
-	iostat_ctx->type = 0;
-	iostat_ctx->post_read_ctx = ctx;
-	bio->bi_private = iostat_ctx;
-}
-
-static inline void __update_submit_iostat_ctx(struct bio *bio,
-		enum page_type type)
-{
-	struct bio_iostat_ctx *iostat_ctx = bio->bi_private;
-
-	iostat_ctx->submit_ts = jiffies;
-	iostat_ctx->type = type;
-}
-
-static inline struct bio_post_read_ctx *__get_post_read_ctx(struct bio *bio)
-{
-	struct bio_iostat_ctx *iostat_ctx = bio->bi_private;
-
-	return iostat_ctx->post_read_ctx;
-}
-#else
-static inline void __update_and_unbind_iostat_ctx(struct bio *bio, int rw) {}
-static inline void __alloc_and_bind_iostat_ctx(struct f2fs_sb_info *sbi,
-		struct bio *bio, struct bio_post_read_ctx *ctx) {}
-static inline void __update_submit_iostat_ctx(struct bio *bio,
-		enum page_type type) {}
-static inline struct bio_post_read_ctx *__get_post_read_ctx(struct bio *bio)
-{
-	return bio->bi_private;
-}
-#endif
-
 static void f2fs_read_end_io(struct bio *bio)
 {
 	struct page *first_page = bio->bi_io_vec[0].bv_page;
 	struct f2fs_sb_info *sbi = F2FS_P_SB(first_page);
-	struct bio_post_read_ctx *ctx;
-
-	__update_and_unbind_iostat_ctx(bio, 0);
-	ctx = bio->bi_private;
+	struct bio_post_read_ctx *ctx = bio->bi_private;
 
 	if (time_to_inject(sbi, FAULT_READ_IO)) {
 		f2fs_show_injection_info(sbi, FAULT_READ_IO);
@@ -362,12 +299,9 @@ static void f2fs_read_end_io(struct bio *bio)
 
 static void f2fs_write_end_io(struct bio *bio)
 {
-	struct f2fs_sb_info *sbi;
+	struct f2fs_sb_info *sbi = bio->bi_private;
 	struct bio_vec *bvec;
 	int iter_all;
-
-	__update_and_unbind_iostat_ctx(bio, 1);
-	sbi = bio->bi_private;
 
 	if (time_to_inject(sbi, FAULT_WRITE_IO)) {
 		f2fs_show_injection_info(sbi, FAULT_WRITE_IO);
@@ -482,8 +416,6 @@ static struct bio *__bio_alloc(struct f2fs_io_info *fio, int npages)
 		bio->bi_write_hint = f2fs_io_type_to_rw_hint(sbi,
 						fio->type, fio->temp);
 	}
-	__alloc_and_bind_iostat_ctx(sbi, bio, NULL);
-
 	if (fio->io_wbc)
 		wbc_init_bio(fio->io_wbc, bio);
 
@@ -569,9 +501,6 @@ submit_io:
 		trace_f2fs_submit_read_bio(sbi->sb, type, bio);
 	else
 		trace_f2fs_submit_write_bio(sbi->sb, type, bio);
-
-	__update_submit_iostat_ctx(bio, type);
-
 	submit_bio(bio);
 }
 
@@ -845,7 +774,7 @@ static void add_bio_entry(struct f2fs_sb_info *sbi, struct bio *bio,
 	struct f2fs_bio_info *io = sbi->write_io[DATA] + temp;
 	struct bio_entry *be;
 
-	be = f2fs_kmem_cache_alloc(bio_entry_slab, GFP_NOFS, true, NULL);
+	be = f2fs_kmem_cache_alloc(bio_entry_slab, GFP_NOFS);
 	be->bio = bio;
 	bio_get(bio);
 
@@ -1090,7 +1019,7 @@ static struct bio *f2fs_grab_read_bio(struct inode *inode, block_t blkaddr,
 {
 	struct f2fs_sb_info *sbi = F2FS_I_SB(inode);
 	struct bio *bio;
-	struct bio_post_read_ctx *ctx = NULL;
+	struct bio_post_read_ctx *ctx;
 	unsigned int post_read_steps = 0;
 
 	bio = bio_alloc_bioset(for_write ? GFP_NOIO : GFP_KERNEL,
@@ -1127,7 +1056,6 @@ static struct bio *f2fs_grab_read_bio(struct inode *inode, block_t blkaddr,
 		ctx->fs_blkaddr = blkaddr;
 		bio->bi_private = ctx;
 	}
-	__alloc_and_bind_iostat_ctx(sbi, bio, ctx);
 
 	return bio;
 }
@@ -1625,13 +1553,6 @@ next_block:
 			map->m_flags |= F2FS_MAP_NEW;
 			blkaddr = dn.data_blkaddr;
 		} else {
-			if (f2fs_compressed_file(inode) &&
-					f2fs_sanity_check_cluster(&dn) &&
-					(flag != F2FS_GET_BLOCK_FIEMAP ||
-					IS_ENABLED(CONFIG_F2FS_CHECK_FS))) {
-				err = -EFSCORRUPTED;
-				goto sync_out;
-			}
 			if (flag == F2FS_GET_BLOCK_BMAP) {
 				map->m_pblk = 0;
 				goto sync_out;
@@ -2325,7 +2246,7 @@ submit_and_realloc:
 		if (bio_add_page(bio, page, blocksize, 0) < blocksize)
 			goto submit_and_realloc;
 
-		ctx = __get_post_read_ctx(bio);
+		ctx = bio->bi_private;
 		ctx->enabled_steps |= STEP_DECOMPRESS;
 		refcount_inc(&dic->refcnt);
 
@@ -4312,34 +4233,6 @@ void f2fs_destroy_post_read_processing(void)
 	mempool_destroy(bio_post_read_ctx_pool);
 	kmem_cache_destroy(bio_post_read_ctx_cache);
 }
-
-#ifdef CONFIG_F2FS_IOSTAT_IO_LATENCY
-int __init f2fs_init_iostat_processing(void)
-{
-	bio_iostat_ctx_cache =
-		kmem_cache_create("f2fs_bio_iostat_ctx",
-				  sizeof(struct bio_iostat_ctx), 0, 0, NULL);
-	if (!bio_iostat_ctx_cache)
-		goto fail;
-	bio_iostat_ctx_pool =
-		mempool_create_slab_pool(NUM_PREALLOC_IOSTAT_CTXS,
-					 bio_iostat_ctx_cache);
-	if (!bio_iostat_ctx_pool)
-		goto fail_free_cache;
-	return 0;
-
-fail_free_cache:
-	kmem_cache_destroy(bio_iostat_ctx_cache);
-fail:
-	return -ENOMEM;
-}
-
-void f2fs_destroy_iostat_processing(void)
-{
-	mempool_destroy(bio_iostat_ctx_pool);
-	kmem_cache_destroy(bio_iostat_ctx_cache);
-}
-#endif
 
 int f2fs_init_post_read_wq(struct f2fs_sb_info *sbi)
 {

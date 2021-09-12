@@ -42,7 +42,6 @@ enum {
 	FAULT_KVMALLOC,
 	FAULT_PAGE_ALLOC,
 	FAULT_PAGE_GET,
-	FAULT_ALLOC_BIO,	/* it's obsolete due to bio_alloc() will never fail */
 	FAULT_ALLOC_NID,
 	FAULT_ORPHAN,
 	FAULT_BLOCK,
@@ -53,7 +52,6 @@ enum {
 	FAULT_CHECKPOINT,
 	FAULT_DISCARD,
 	FAULT_WRITE_IO,
-	FAULT_SLAB_ALLOC,
 	FAULT_MAX,
 };
 
@@ -1786,17 +1784,6 @@ struct f2fs_sb_info {
 	unsigned int compress_watermark;	/* cache page watermark */
 	atomic_t compress_page_hit;		/* cache hit count */
 #endif
-
-#ifdef CONFIG_F2FS_IOSTAT_IO_LATENCY
-	/* for io latency related statistics info in one iostat period */
-	spinlock_t iostat_lat_lock;
-	unsigned long rd_sum_lat[NR_PAGE_TYPE];		/* sum of read io latencies */
-	unsigned long rd_peak_lat[NR_PAGE_TYPE];	/* peak read io latency */
-	unsigned int rd_bio_cnt[NR_PAGE_TYPE];		/* read bio count */
-	unsigned long wr_sum_lat[2][NR_PAGE_TYPE];	/* sum of write io latencies (sync/async) */
-	unsigned long wr_peak_lat[2][NR_PAGE_TYPE];	/* peak write io latency (sync/async) */
-	unsigned int wr_bio_cnt[2][NR_PAGE_TYPE];	/* write bio count (sync/async) */
-#endif
 };
 
 struct f2fs_private_dio {
@@ -2638,7 +2625,7 @@ static inline struct kmem_cache *f2fs_kmem_cache_create(const char *name,
 	return kmem_cache_create(name, size, 0, SLAB_RECLAIM_ACCOUNT, NULL);
 }
 
-static inline void *f2fs_kmem_cache_alloc_nofail(struct kmem_cache *cachep,
+static inline void *f2fs_kmem_cache_alloc(struct kmem_cache *cachep,
 						gfp_t flags)
 {
 	void *entry;
@@ -2647,20 +2634,6 @@ static inline void *f2fs_kmem_cache_alloc_nofail(struct kmem_cache *cachep,
 	if (!entry)
 		entry = kmem_cache_alloc(cachep, flags | __GFP_NOFAIL);
 	return entry;
-}
-
-static inline void *f2fs_kmem_cache_alloc(struct kmem_cache *cachep,
-			gfp_t flags, bool nofail, struct f2fs_sb_info *sbi)
-{
-	if (nofail)
-		return f2fs_kmem_cache_alloc_nofail(cachep, flags);
-
-	if (time_to_inject(sbi, FAULT_SLAB_ALLOC)) {
-		f2fs_show_injection_info(sbi, FAULT_SLAB_ALLOC);
-		return NULL;
-	}
-
-	return kmem_cache_alloc(cachep, flags);
 }
 
 static inline bool is_inflight_io(struct f2fs_sb_info *sbi, int type)
@@ -3290,26 +3263,6 @@ static inline void f2fs_reset_iostat(struct f2fs_sb_info *sbi)
 		sbi->prev_rw_iostat[i] = 0;
 	}
 	spin_unlock(&sbi->iostat_lock);
-
-#ifdef CONFIG_F2FS_IOSTAT_IO_LATENCY
-	spin_lock_irq(&sbi->iostat_lat_lock);
-	for (i = 0; i < NR_PAGE_TYPE; i++) {
-		sbi->rd_sum_lat[i] = 0;
-		sbi->rd_peak_lat[i] = 0;
-		sbi->rd_bio_cnt[i] = 0;
-	}
-
-	for (i = 0; i < 2; i++) {
-		int iotype;
-
-		for (iotype = 0; iotype < NR_PAGE_TYPE; iotype++) {
-			sbi->wr_sum_lat[i][iotype] = 0;
-			sbi->wr_peak_lat[i][iotype] = 0;
-			sbi->wr_bio_cnt[i][iotype] = 0;
-		}
-	}
-	spin_unlock_irq(&sbi->iostat_lat_lock);
-#endif
 }
 
 extern void f2fs_record_iostat(struct f2fs_sb_info *sbi);
@@ -3335,54 +3288,6 @@ static inline void f2fs_update_iostat(struct f2fs_sb_info *sbi,
 
 	f2fs_record_iostat(sbi);
 }
-
-#ifdef CONFIG_F2FS_IOSTAT_IO_LATENCY
-
-struct bio_post_read_ctx;
-
-struct bio_iostat_ctx {
-	struct f2fs_sb_info *sbi;
-	unsigned long submit_ts;
-	enum page_type type;
-	struct bio_post_read_ctx *post_read_ctx;
-};
-
-struct f2fs_iostat_latency {
-	unsigned int peak_lat;
-	unsigned int avg_lat;
-	unsigned int cnt;
-};
-
-static inline void __update_iostat_latency(struct bio_iostat_ctx *iostat_ctx,
-				int rw, int sync)
-{
-	unsigned long ts_diff;
-	unsigned int iotype = iostat_ctx->type;
-	unsigned long flags;
-	struct f2fs_sb_info *sbi = iostat_ctx->sbi;
-
-	if (!sbi->iostat_enable)
-		return;
-
-	ts_diff = jiffies - iostat_ctx->submit_ts;
-	if (iotype >= META_FLUSH)
-		iotype = META;
-
-	spin_lock_irqsave(&sbi->iostat_lat_lock, flags);
-	if (rw == 0) {
-		sbi->rd_sum_lat[iotype] += ts_diff;
-		sbi->rd_bio_cnt[iotype]++;
-		if (ts_diff > sbi->rd_peak_lat[iotype])
-			sbi->rd_peak_lat[iotype] = ts_diff;
-	} else {
-		sbi->wr_sum_lat[sync][iotype] += ts_diff;
-		sbi->wr_bio_cnt[sync][iotype]++;
-		if (ts_diff > sbi->wr_peak_lat[sync][iotype])
-			sbi->wr_peak_lat[sync][iotype] = ts_diff;
-	}
-	spin_unlock_irqrestore(&sbi->iostat_lat_lock, flags);
-}
-#endif
 
 #define __is_large_section(sbi)		((sbi)->segs_per_sec > 1)
 
@@ -3803,13 +3708,6 @@ bool f2fs_overwrite_io(struct inode *inode, loff_t pos, size_t len);
 void f2fs_clear_radix_tree_dirty_tag(struct page *page);
 int f2fs_init_post_read_processing(void);
 void f2fs_destroy_post_read_processing(void);
-#ifdef CONFIG_F2FS_IOSTAT_IO_LATENCY
-int f2fs_init_iostat_processing(void);
-void f2fs_destroy_iostat_processing(void);
-#else
-static inline int f2fs_init_iostat_processing(void) { return 0; }
-static inline void f2fs_destroy_iostat_processing(void) {}
-#endif
 int f2fs_init_post_read_wq(struct f2fs_sb_info *sbi);
 void f2fs_destroy_post_read_wq(struct f2fs_sb_info *sbi);
 
@@ -4213,7 +4111,6 @@ void f2fs_end_read_compressed_page(struct page *page, bool failed,
 							block_t blkaddr);
 bool f2fs_cluster_is_empty(struct compress_ctx *cc);
 bool f2fs_cluster_can_merge_page(struct compress_ctx *cc, pgoff_t index);
-bool f2fs_sanity_check_cluster(struct dnode_of_data *dn);
 void f2fs_compress_ctx_add_page(struct compress_ctx *cc, struct page *page);
 int f2fs_write_multi_pages(struct compress_ctx *cc,
 						int *submitted,
@@ -4285,7 +4182,6 @@ static inline void f2fs_put_page_dic(struct page *page)
 	WARN_ON_ONCE(1);
 }
 static inline unsigned int f2fs_cluster_blocks_are_contiguous(struct dnode_of_data *dn) { return 0; }
-static bool f2fs_sanity_check_cluster(struct dnode_of_data *dn) { return false; }
 static inline int f2fs_init_compress_inode(struct f2fs_sb_info *sbi) { return 0; }
 static inline void f2fs_destroy_compress_inode(struct f2fs_sb_info *sbi) { }
 static inline int f2fs_init_page_array_cache(struct f2fs_sb_info *sbi) { return 0; }

@@ -239,7 +239,7 @@ static struct extent_node *__attach_extent_node(struct f2fs_sb_info *sbi,
 {
 	struct extent_node *en;
 
-	en = f2fs_kmem_cache_alloc(extent_node_slab, GFP_ATOMIC, false, sbi);
+	en = kmem_cache_alloc(extent_node_slab, GFP_ATOMIC);
 	if (!en)
 		return NULL;
 
@@ -292,8 +292,7 @@ static struct extent_tree *__grab_extent_tree(struct inode *inode)
 	mutex_lock(&sbi->extent_tree_lock);
 	et = radix_tree_lookup(&sbi->extent_tree_root, ino);
 	if (!et) {
-		et = f2fs_kmem_cache_alloc(extent_tree_slab,
-					GFP_NOFS, true, NULL);
+		et = f2fs_kmem_cache_alloc(extent_tree_slab, GFP_NOFS);
 		f2fs_radix_tree_insert(&sbi->extent_tree_root, ino, et);
 		memset(et, 0, sizeof(struct extent_tree));
 		et->ino = ino;
