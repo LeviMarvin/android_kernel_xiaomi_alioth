@@ -6508,6 +6508,7 @@ static int __wlan_hdd_cfg80211_start_ap(struct wiphy *wiphy,
 	/* if sta_sap_scc_on_dfs_chan ini is set, DFS master capability is
 	 * assumed disabled in the driver.
 	 */
+	/*
 	if ((wlan_reg_get_channel_state(hdd_ctx->pdev, channel) ==
 	     CHANNEL_STATE_DFS) && !sta_cnt && sta_sap_scc_on_dfs_chan &&
 	     !ucfg_policy_mgr_get_dfs_master_dynamic_enabled(
@@ -6515,6 +6516,7 @@ static int __wlan_hdd_cfg80211_start_ap(struct wiphy *wiphy,
 		hdd_err("SAP not allowed on DFS channel if no dfs master capability!!");
 		return -EINVAL;
 	}
+	*/
 	if (!wlan_reg_is_etsi13_srd_chan_allowed_master_mode(hdd_ctx->pdev) &&
 	    wlan_reg_is_etsi13_srd_chan(hdd_ctx->pdev, channel)) {
 		hdd_err("SAP not allowed on SRD channel.");

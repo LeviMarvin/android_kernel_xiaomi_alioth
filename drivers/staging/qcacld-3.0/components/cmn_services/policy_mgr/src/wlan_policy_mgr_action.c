@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012-2020 The Linux Foundation. All rights reserved.
+ * Copyright (C) 2021 XiaoMi, Inc.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -1985,7 +1986,8 @@ QDF_STATUS policy_mgr_valid_sap_conc_channel_check(
 								pm_ctx->pdev) &&
 		     wlan_reg_is_etsi13_srd_chan_for_freq(pm_ctx->pdev,
 							  ch_freq))) {
-			if (wlan_reg_is_dfs_for_freq(pm_ctx->pdev, ch_freq) &&
+			if ((wlan_reg_is_dfs_for_freq(pm_ctx->pdev, ch_freq) ||
+			    wlan_reg_is_freq_indoor(pm_ctx->pdev, ch_freq)) &&
 			    sta_sap_scc_on_dfs_chan) {
 				policy_mgr_debug("STA SAP SCC is allowed on DFS channel");
 				goto update_chan;
