@@ -195,7 +195,8 @@ static int uprobe_single_step_handler(struct pt_regs *regs,
 
 /* uprobe breakpoint handler hook */
 static struct break_hook uprobes_break_hook = {
-	.imm = BRK64_ESR_UPROBES,
+	.esr_mask = BRK64_ESR_MASK,
+	.esr_val = BRK64_ESR_UPROBES,
 	.fn = uprobe_breakpoint_handler,
 };
 
@@ -206,8 +207,8 @@ static struct step_hook uprobes_step_hook = {
 
 static int __init arch_init_uprobes(void)
 {
-	register_user_break_hook(&uprobes_break_hook);
-	register_user_step_hook(&uprobes_step_hook);
+	register_break_hook(&uprobes_break_hook);
+	register_step_hook(&uprobes_step_hook);
 
 	return 0;
 }
