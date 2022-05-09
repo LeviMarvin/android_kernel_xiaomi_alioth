@@ -85,6 +85,7 @@ struct cam_ois_intf_params {
 	struct cam_req_mgr_kmd_ops ops;
 	struct cam_req_mgr_crm_cb *crm_cb;
 };
+
 #ifdef ENABLE_OIS_EIS
 struct ois_data_eis_t {
 	uint64_t data_timestamp;
@@ -95,6 +96,7 @@ struct ois_tele_data_eis_t {
 	uint8_t  data[48];
 };
 #endif
+
 /**
  * struct cam_ois_ctrl_t - OIS ctrl private data
  * @device_name     :   ois device_name
