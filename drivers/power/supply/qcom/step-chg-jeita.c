@@ -553,7 +553,7 @@ static int get_val(struct range_data *range, int hysteresis, int current_index,
 	 * of our current index.
 	 */
 	if (*new_index == current_index + 1) {
-		if (threshold < range[*new_index].low_threshold) {
+		if (threshold < range[*new_index].low_threshold + hysteresis) {
 			/*
 			 * Stay in the current index, threshold is not higher
 			 * by hysteresis amount
@@ -1180,10 +1180,6 @@ int qcom_step_chg_init(struct device *dev,
 	chip->step_chg_config->param.prop_name = "VBATT";
 	chip->step_chg_config->param.hysteresis = 100000;
 
-	chip->cold_step_chg_config->param.psy_prop = POWER_SUPPLY_PROP_VOLTAGE_NOW;
-	chip->cold_step_chg_config->param.prop_name = "VBATT";
-	chip->cold_step_chg_config->param.hysteresis = 100000;
-
 	chip->jeita_fcc_config = devm_kzalloc(dev,
 			sizeof(struct jeita_fcc_cfg), GFP_KERNEL);
 	chip->jeita_fv_config = devm_kzalloc(dev,
@@ -1193,10 +1189,10 @@ int qcom_step_chg_init(struct device *dev,
 
 	chip->jeita_fcc_config->param.psy_prop = POWER_SUPPLY_PROP_TEMP;
 	chip->jeita_fcc_config->param.prop_name = "BATT_TEMP";
-	chip->jeita_fcc_config->param.hysteresis = 20;
+	chip->jeita_fcc_config->param.hysteresis = 10;
 	chip->jeita_fv_config->param.psy_prop = POWER_SUPPLY_PROP_TEMP;
 	chip->jeita_fv_config->param.prop_name = "BATT_TEMP";
-	chip->jeita_fv_config->param.hysteresis = 20;
+	chip->jeita_fv_config->param.hysteresis = 10;
 
 	INIT_DELAYED_WORK(&chip->status_change_work, status_change_work);
 	INIT_DELAYED_WORK(&chip->get_config_work, get_config_work);
