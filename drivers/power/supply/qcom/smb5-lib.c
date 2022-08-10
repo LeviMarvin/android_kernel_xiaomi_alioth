@@ -4871,18 +4871,24 @@ static void smblib_conn_therm_work(struct work_struct *work)
 			smblib_err(chg, "vbus_temp[%d-%d-%d-%d]\n", chg->connector_temp, chg->skin_temp, chg->smb_temp, chg->die_temp);
 			smblib_dbg(chg, PR_OEM, "connect temp is too hot, disable vbus, sink_src_mode[%d]\n",chg->sink_src_mode);
 			vote(chg->usb_icl_votable, SW_CONN_THERM_VOTER, true, 0);
-			if (chg->sink_src_mode == SRC_MODE)
-				smblib_vbus_regulator_disable(chg->vbus_vreg->rdev);
-			else
+			if (chg->sink_src_mode == SRC_MODE) {
+				if (chg->support_ext_5v_boost)
+					smblib_set_vbus_disable(chg, true);
+				else
+					smblib_vbus_regulator_disable(chg->vbus_vreg->rdev);
+			} else
 				smblib_set_vbus_disable(chg, true);
 		} else {
 			smblib_err(chg, "connect temp normal recovery vbus\n");
 			smblib_err(chg, "vbus_temp[%d-%d-%d-%d]\n", chg->connector_temp, chg->skin_temp, chg->smb_temp, chg->die_temp);
 			smblib_dbg(chg, PR_OEM, "connect temp normal recovery vbus, sink_src_mode[%d]\n",chg->sink_src_mode);
 			vote(chg->usb_icl_votable, SW_CONN_THERM_VOTER, false, 0);
-			if (chg->sink_src_mode == SRC_MODE)
-				smblib_vbus_regulator_enable(chg->vbus_vreg->rdev);
-			else
+			if (chg->sink_src_mode == SRC_MODE) {
+				if (chg->support_ext_5v_boost)
+					smblib_set_vbus_disable(chg, false);
+				else
+					smblib_vbus_regulator_enable(chg->vbus_vreg->rdev);
+			} else
 				smblib_set_vbus_disable(chg, false);
 		}
 		power_supply_changed(chg->usb_psy);
@@ -8811,6 +8817,7 @@ struct quick_charge adapter_cap[11] = {
 	{0, 0},
 };
 
+#define WIRE_SUPER_POWER_MAX		50
 #define ADAPTER_PWR_NONE              0x0
 #define ADAPTER_XIAOMI_QC3_PWR_20W    0x9
 #define ADAPTER_XIAOMI_PD_PWR_20W     0xa
@@ -8823,6 +8830,9 @@ int smblib_get_quick_charge_type(struct smb_charger *chg)
 {
 	int i = 0, rc;
 	int tx_adapter = 0, wls_online = 0;
+	int power_max = 0;
+	int quick_charge_type = 0;
+	static bool update = false;
 	union power_supply_propval pval = {0, };
 
 	if (!chg) {
@@ -8840,8 +8850,21 @@ int smblib_get_quick_charge_type(struct smb_charger *chg)
 	}
 
 	if ((chg->real_charger_type == POWER_SUPPLY_TYPE_USB_PD) && chg->pd_verifed) {
-		return QUICK_CHARGE_TURBE;
+		power_max = smblib_get_adapter_power_max(chg);
+		if (power_max >= WIRE_SUPER_POWER_MAX)
+			quick_charge_type = QUICK_CHARGE_SUPER;
+		else
+			quick_charge_type = QUICK_CHARGE_TURBE;
+
+		if (chg->usb_psy && !update) {
+			power_supply_changed(chg->usb_psy);
+			update = true;
+		}
+
+		return quick_charge_type;
 	}
+
+	update = false;
 
 	if (chg->is_qc_class_b || chg->real_charger_type == POWER_SUPPLY_TYPE_USB_HVDCP_3P5)
 		return QUICK_CHARGE_FLASH;
@@ -8858,6 +8881,8 @@ int smblib_get_quick_charge_type(struct smb_charger *chg)
 		wls_online = pval.intval;
 
 		if (wls_online) {
+			if (tx_adapter >= ADAPTER_XIAOMI_PD_PWR_30W)
+				return QUICK_CHARGE_SUPER;
 			if (tx_adapter >= ADAPTER_XIAOMI_QC3_PWR_20W)
 				return QUICK_CHARGE_TURBE;
 			else if (tx_adapter > ADAPTER_PWR_NONE)
@@ -8930,8 +8955,17 @@ int smblib_get_adapter_power_max(struct smb_charger *chg)
 			rc = power_supply_get_property(chg->usb_psy,
 						POWER_SUPPLY_PROP_APDO_MAX, &pval);
 			apdo_max = pval.intval;
-			/*pr_info("apdo_max:%d\n", apdo_max);*/
-			return apdo_max;
+
+			if (apdo_max == 65)
+				return APDO_MAX_65W; /* only for J1 65W adapter */
+			else if (apdo_max >= 60)
+				return APDO_MAX_67W;
+			else if (apdo_max >= 55 && apdo_max < 60)
+				return APDO_MAX_55W;
+			else if (apdo_max >= 50 && apdo_max < 55)
+				return APDO_MAX_50W;
+			else
+				return apdo_max;
 		}
 	}
 
@@ -11005,11 +11039,14 @@ static void smblib_six_pin_batt_step_chg_work(struct work_struct *work)
 			if (!chg->cp_psy)
 				pr_err("cp_psy not found\n");
 		}
-		rc = power_supply_get_property(chg->cp_psy,
-				POWER_SUPPLY_PROP_TI_BATTERY_VOLTAGE, &pval);
-		if (rc < 0)
-			pr_err("Error in getting TI_BATTERY_VOLTAGE, rc=%d\n", rc);
-		ti_battery_voltage = pval.intval;
+
+		if (chg->cp_psy) {
+			rc = power_supply_get_property(chg->cp_psy,
+					POWER_SUPPLY_PROP_TI_BATTERY_VOLTAGE, &pval);
+			if (rc < 0)
+				pr_err("Error in getting TI_BATTERY_VOLTAGE, rc=%d\n", rc);
+			ti_battery_voltage = pval.intval;
+		}
 
 		rc = power_supply_get_property(chg->bms_psy,
 					POWER_SUPPLY_PROP_TEMP, &pval);
