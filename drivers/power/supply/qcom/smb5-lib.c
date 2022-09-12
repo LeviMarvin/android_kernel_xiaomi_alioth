@@ -10205,6 +10205,8 @@ int smblib_set_sw_disable_dc_en(struct smb_charger *chg,
 			dev_err(chg->dev, "Couldn't enable dcin_pulldown rc=%d\n", rc);
 			return rc;
 		}
+		/* wait 10ms to pull mid_chg lower than Vsys+Vrevi */
+		msleep(10);
 
 		/* step4: exit dc suspend */
 		rc = vote(chg->dc_suspend_votable, SW_DISABLE_DC_VOTER,
@@ -11236,6 +11238,7 @@ out:
 	} else {
 		interval_ms = STEP_CHG_DELAYED_MONITOR_MS;
 	}
+
 	schedule_delayed_work(&chg->six_pin_batt_step_chg_work,
 				msecs_to_jiffies(interval_ms));
 }
