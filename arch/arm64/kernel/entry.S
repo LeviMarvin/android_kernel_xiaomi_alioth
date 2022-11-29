@@ -1101,11 +1101,11 @@ alternative_endif
 	.endm
 
 #ifdef CONFIG_UNMAP_KERNEL_AT_EL0
-/*
- * Exception vectors trampoline.
- * The order must match __bp_harden_el1_vectors and the
- * arm64_bp_harden_el1_vectors enum.
- */
+	/*
+	 * Exception vectors trampoline.
+	 * The order must match __bp_harden_el1_vectors and the
+	 * arm64_bp_harden_el1_vectors enum.
+	 */
 	.pushsection ".entry.tramp.text", "ax"
 	.align	11
 ENTRY(tramp_vectors)
