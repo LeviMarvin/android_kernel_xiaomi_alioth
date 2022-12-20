@@ -3596,18 +3596,6 @@ static const struct bpf_func_proto bpf_skb_get_tunnel_opt_proto = {
 	.arg3_type	= ARG_CONST_SIZE,
 };
 
-BPF_CALL_1(bpf_get_comm_hash_from_sk, struct sk_buff *, skb)
-{
-	return 0;
-}
-
-static const struct bpf_func_proto bpf_get_comm_hash_from_sk_proto = {
-	.func           = bpf_get_comm_hash_from_sk,
-	.gpl_only       = false,
-	.ret_type       = RET_INTEGER,
-	.arg1_type      = ARG_PTR_TO_CTX,
-};
-
 static struct metadata_dst __percpu *md_dst;
 
 BPF_CALL_4(bpf_skb_set_tunnel_key, struct sk_buff *, skb,
