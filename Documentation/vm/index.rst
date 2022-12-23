@@ -36,7 +36,6 @@ descriptions of data structures and algorithms.
    hugetlbfs_reserv
    ksm
    mmu_notifier
-   multigen_lru
    numa
    overcommit-accounting
    page_migration
