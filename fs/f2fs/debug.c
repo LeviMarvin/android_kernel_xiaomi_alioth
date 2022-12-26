@@ -3,7 +3,6 @@
  * f2fs debugging statistics
  *
  * Copyright (c) 2012 Samsung Electronics Co., Ltd.
- * Copyright (C) 2021 XiaoMi, Inc.
  *             http://www.samsung.com/
  * Copyright (c) 2012 Linux Foundation
  * Copyright (c) 2012 Greg Kroah-Hartman <gregkh@linuxfoundation.org>
@@ -12,7 +11,6 @@
 #include <linux/fs.h>
 #include <linux/backing-dev.h>
 #include <linux/f2fs_fs.h>
-#include <linux/proc_fs.h>
 #include <linux/blkdev.h>
 #include <linux/debugfs.h>
 #include <linux/seq_file.h>
@@ -27,7 +25,6 @@ static DEFINE_RAW_SPINLOCK(f2fs_stat_lock);
 #ifdef CONFIG_DEBUG_FS
 static struct dentry *f2fs_debugfs_root;
 #endif
-extern struct proc_dir_entry *f2fs_proc_root;
 
 /*
  * This function calculates BDF of every segments
@@ -62,21 +59,7 @@ void f2fs_update_sit_info(struct f2fs_sb_info *sbi)
 		si->avg_vblocks = 0;
 }
 
-const char *f2fs_cp_reasons[NR_CP_REASON_TYPE] = {
-	"no needed",
-	"non regular",
-	"compressed",
-	"hardlink",
-	"sb needs cp",
-	"wrong pino",
-	"no space roll forward",
-	"node needs cp",
-	"fastboot mode",
-	"log type is 2",
-	"dir needs recovery",
-	"parent dir xattr set",
-};
-
+#ifdef CONFIG_DEBUG_FS
 static void update_general_status(struct f2fs_sb_info *sbi)
 {
 	struct f2fs_stat_info *si = F2FS_STAT(sbi);
@@ -92,10 +75,6 @@ static void update_general_status(struct f2fs_sb_info *sbi)
 	/* validation check of the segment numbers */
 	si->hit_largest = atomic64_read(&sbi->read_hit_largest);
 	si->hit_cached = atomic64_read(&sbi->read_hit_cached);
-	si->sync_file_total = atomic64_read(&sbi->sync_file_count);
-	for (i = 0; i < NR_CP_REASON_TYPE; i++)
-		si->cp_reason_total[i] = atomic64_read(&sbi->cp_reason_count[i]);
-
 	si->hit_rbtree = atomic64_read(&sbi->read_hit_rbtree);
 	si->hit_total = si->hit_largest + si->hit_cached + si->hit_rbtree;
 	si->total_ext = atomic64_read(&sbi->total_hit_ext);
@@ -473,11 +452,6 @@ static int stat_show(struct seq_file *s, void *v)
 			   si->dirty_count);
 		seq_printf(s, "  - Prefree: %d\n  - Free: %d (%d)\n\n",
 			   si->prefree_count, si->free_segs, si->free_secs);
-		seq_printf(s, "sync_file calls: %llu\n", si->sync_file_total);
-		seq_printf(s, "  - %-25s%-10s\n", "cp reason", "counts");
-		for (i = 0; i < NR_CP_REASON_TYPE; i++)
-			if (si->cp_reason_total[i])
-				seq_printf(s, "  - %-25s%-10llu\n", f2fs_cp_reasons[i], si->cp_reason_total[i]);
 		seq_printf(s, "CP calls: %d (BG: %d)\n",
 				si->cp_count, si->bg_cp_count);
 		seq_printf(s, "  - cp blocks : %u\n", si->meta_count[META_CP]);
@@ -602,7 +576,6 @@ static int stat_show(struct seq_file *s, void *v)
 	return 0;
 }
 
-#ifdef CONFIG_DEBUG_FS
 DEFINE_SHOW_ATTRIBUTE(stat);
 #endif
 
@@ -632,9 +605,6 @@ int f2fs_build_stats(struct f2fs_sb_info *sbi)
 	atomic64_set(&sbi->read_hit_rbtree, 0);
 	atomic64_set(&sbi->read_hit_largest, 0);
 	atomic64_set(&sbi->read_hit_cached, 0);
-	atomic64_set(&sbi->sync_file_count, 0);
-	for (i = 0; i < NR_CP_REASON_TYPE; i++)
-		atomic64_set(&sbi->cp_reason_count[i], 0);
 
 	atomic_set(&sbi->inline_xattr, 0);
 	atomic_set(&sbi->inline_inode, 0);
@@ -676,16 +646,10 @@ void __init f2fs_create_root_stats(void)
 	debugfs_create_file("status", 0444, f2fs_debugfs_root, NULL,
 			    &stat_fops);
 #endif
-	if (f2fs_proc_root)
-		proc_create_single_data("status", S_IRUGO, f2fs_proc_root,
-				stat_show, NULL);
 }
 
 void f2fs_destroy_root_stats(void)
 {
-	if (f2fs_proc_root)
-		remove_proc_entry("status", f2fs_proc_root);
-
 #ifdef CONFIG_DEBUG_FS
 	debugfs_remove_recursive(f2fs_debugfs_root);
 	f2fs_debugfs_root = NULL;
