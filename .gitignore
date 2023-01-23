@@ -138,3 +138,6 @@ kernel/configs/android-*.cfg
 
 # Tech package directories
 #techpack/
+
+# Output directory
+out/
