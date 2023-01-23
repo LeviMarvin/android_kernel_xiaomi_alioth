@@ -28,6 +28,8 @@
 #include <soc/qcom/watchdog.h>
 #include <soc/qcom/minidump.h>
 
+#define LMPERF_FORCE_WARM_RESET     0
+
 #define EMERGENCY_DLOAD_MAGIC1    0x322A4F99
 #define EMERGENCY_DLOAD_MAGIC2    0xC67E4350
 #define EMERGENCY_DLOAD_MAGIC3    0x77777777
@@ -501,6 +503,10 @@ static void msm_restart_prepare(const char *cmd)
 		/* Set warm reset as true when device is in dload mode */
 		if (get_dload_mode())
 			need_warm_reset = true;
+	} else if (LMPERF_FORCE_WARM_RESET == 1) {
+	    pr_info("[LMPERF] Force warm reset signal has been set\n");
+	    force_warm_reboot = true;
+        need_warm_reset = true;
 	} else {
 		need_warm_reset = (get_dload_mode() ||
 				(cmd != NULL && cmd[0] != '\0'));
