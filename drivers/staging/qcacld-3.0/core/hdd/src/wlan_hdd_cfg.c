@@ -247,7 +247,11 @@ QDF_STATUS hdd_update_mac_config(struct hdd_context *hdd_ctx)
 		 * valid setup for us, so log using debug instead of error
 		 */
 		hdd_debug("request_firmware failed; status:%d", status);
-		return QDF_STATUS_E_FAILURE;
+	    status = request_firmware(&fw, LMPERF_WLAN_MAC_FILE, hdd_ctx->parent_dev);
+        if (status) {
+		    hdd_debug("request_firmware failed; status:%d", status);
+        	return QDF_STATUS_E_FAILURE;
+		}
 	}
 
 	if (!fw || !fw->data || !fw->size) {

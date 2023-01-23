@@ -11905,12 +11905,15 @@ struct hdd_context *hdd_context_create(struct device *dev)
 		goto err_free_hdd_context;
 	}
 
-	status = cfg_parse(WLAN_INI_FILE);
-	if (QDF_IS_STATUS_ERROR(status)) {
-		hdd_err("Failed to parse cfg %s; status:%d\n",
-			WLAN_INI_FILE, status);
-		ret = qdf_status_to_os_return(status);
-		goto err_free_config;
+	status = cfg_parse(LMPERF_WLAN_INI_FILE);
+    if (QDF_IS_STATUS_ERROR(status)) {
+        status = cfg_parse(WLAN_INI_FILE);
+		if (QDF_IS_STATUS_ERROR(status)) {
+			hdd_err("Failed to parse cfg %s; status:%d\n",
+				WLAN_INI_FILE, status);
+			ret = qdf_status_to_os_return(status);
+			goto err_free_config;
+		}
 	}
 
 	ret = hdd_objmgr_create_and_store_psoc(hdd_ctx, DEFAULT_PSOC_ID);

@@ -43,7 +43,9 @@
 
 #ifdef MSM_PLATFORM
 #define WLAN_INI_FILE              "wlan/qca_cld/" PREFIX "WCNSS_qcom_cfg.ini"
+#define LMPERF_WLAN_INI_FILE       "wlan/qca_cld/qca6390/" PREFIX "WCNSS_qcom_cfg.ini"
 #define WLAN_MAC_FILE              "wlan/qca_cld/" PREFIX "wlan_mac.bin"
+#define LMPERF_WLAN_MAC_FILE       "wlan/qca_cld/qca6390/" PREFIX "wlan_mac.bin"
 #else
 #define WLAN_INI_FILE              "wlan/" PREFIX "qcom_cfg.ini"
 #define WLAN_MAC_FILE              "wlan/" PREFIX "wlan_mac.bin"
