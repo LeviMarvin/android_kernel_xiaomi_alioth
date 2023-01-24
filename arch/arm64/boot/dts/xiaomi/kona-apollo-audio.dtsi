@@ -1,0 +1,103 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&q6core {
+	tert_tdm_gpios: tert_tdm_pinctl {
+		compatible = "qcom,msm-cdc-pinctrl";
+		pinctrl-names = "aud_active", "aud_sleep";
+		pinctrl-0 = <&tert_tdm_clk_active &tert_tdm_ws_active
+			&tert_tdm_din_active &tert_tdm_dout_active>;
+		pinctrl-1 = <&tert_tdm_clk_sleep &tert_tdm_ws_sleep
+			&tert_tdm_din_sleep &tert_tdm_dout_sleep>;
+		qcom,lpi-gpios;
+	};
+};
+
+&kona_snd {
+	qcom,msm-mbhc-usbc-workaround = <1>;
+	qcom,tert-mi2s-gpios = <&tert_tdm_gpios>;
+};
+
+&tdm_tert_rx {
+	qcom,msm-cpudai-tdm-clk-rate = <12288000>;
+	qcom,msm-cpudai-tdm-sync-mode = <0>;
+	qcom,msm-cpudai-tdm-invert-sync = <0>;
+	qcom,msm-cpudai-tdm-data-delay = <1>;
+};
+
+&tdm_tert_tx {
+	qcom,msm-cpudai-tdm-clk-rate = <12288000>;
+	qcom,msm-cpudai-tdm-sync-mode = <0>;
+	qcom,msm-cpudai-tdm-invert-sync = <0>;
+	qcom,msm-cpudai-tdm-data-delay = <1>;
+};
+
+&qupv3_se3_i2c {
+	status = "ok";
+	qcom,clk-freq-out = <400000>;
+
+	/* Speaker */
+	cs35l41_r: cs35l41@40 {
+		#sound-dai-cells = <1>;
+		compatible = "cirrus,cs35l41";
+		reset-gpios = <&tlmm 114 0>;
+		reg = <0x40>;
+		pinctrl-names = "cs35l41_irq_speaker";
+		pinctrl-0 = <&cs35l41_int_speaker>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <113 8>;
+
+		cirrus,asp-sdout-hiz = <3>;
+
+		cirrus,boost-peak-milliamp = <4000>;
+		cirrus,boost-ind-nanohenry = <1000>;
+		cirrus,boost-cap-microfarad = <15>;
+
+		cirrus,tuning-has-prefix;
+		cirrus,right-channel-amp;
+
+		cirrus,gpio-config2 {
+			cirrus,gpio-src-select = <0x5>;
+			cirrus,gpio-output-enable;
+		};
+	};
+
+	/* Receiver */
+	cs35l41_l: cs35l41@42 {
+		#sound-dai-cells = <1>;
+		compatible = "cirrus,cs35l41";
+		reset-gpios = <&tlmm 114 0>;
+		reg = <0x42>;
+		pinctrl-names = "cs35l41_irq_speaker_rcv";
+		pinctrl-0 = <&cs35l41_int_speaker_rcv>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <112 8>;
+
+		cirrus,asp-sdout-hiz = <3>;
+
+		cirrus,boost-peak-milliamp = <4000>;
+		cirrus,boost-ind-nanohenry = <1000>;
+		cirrus,boost-cap-microfarad = <15>;
+
+		cirrus,left-channel-amp;
+
+		cirrus,gpio-config2 {
+			cirrus,gpio-src-select = <0x5>;
+			cirrus,gpio-output-enable;
+		};
+	};
+};
+
+&cs35l41_r {
+	sound-name-prefix = "R";
+};

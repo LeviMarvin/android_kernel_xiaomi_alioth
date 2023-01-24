@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include "kona-apollo.dtsi"
+
+/ {
+	model = "Xiaomi Inc. MSM sm8250 Apollo";
+	compatible = "qcom,kona";
+	qcom,msm-id = <356 0x20000>;
+	qcom,board-id = <42 0>;
+};

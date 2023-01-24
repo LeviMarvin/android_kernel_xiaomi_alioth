@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&soc {
+	xiaomi_touch {
+		status = "ok";
+		compatible = "xiaomi-touch";
+		touch,name = "xiaomi-touch";
+	};
+};
+
+&qupv3_se13_i2c {
+	status = "ok";
+
+	focaltech {
+		compatible = "focaltech,focal";
+		reg = <0x38>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <39 0x2002>;
+		avdd-supply = <&pm8150a_l1>; //1v8
+		focaltech,vdd-gpio = <&tlmm 72 0x0>;//3v
+		focaltech,avdd-load = <300000>;
+		focaltech,reset-gpio = <&tlmm 38 0x01>;
+		focaltech,irq-gpio = <&tlmm 39 0x02>;
+		focaltech,max-touch-number = <10>;
+		focaltech,display-coords = <0 0 1080 2400>;
+		focaltech,reset-when-resume;
+		focaltech,lockdown-info-addr = <0x1E000>;
+		focaltech,open-min = <2700>;
+		pinctrl-names = "pmx_tp_active", "pmx_tp_suspend";
+		pinctrl-0 = <&tp_active>;
+		pinctrl-1 = <&tp_int_suspend &tp_reset_suspend>;
+	};
+};

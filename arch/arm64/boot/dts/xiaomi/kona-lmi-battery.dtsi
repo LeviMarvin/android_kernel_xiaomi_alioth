@@ -1,0 +1,111 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&google_charger {
+	google,thermal-mitigation = <4600000 4300000 3500000 
+		3000000 2500000 2000000 1500000 1000000 500000>;
+};
+
+&google_battery {
+	google,ttf-adapter = <3000>;
+	google,ttf-soc-table = <50 58 76 83 87 91 93 100>;
+	google,ttf-elap-table = <38 44 58 76 89 121 165 191>;
+	google,ttf-tier-table = <0 59 77>;
+};
+
+&soc {
+	lmi_batterydata: qcom,battery-data {
+		qcom,batt-id-range-pct = <15>;
+		#include "fg-gen4-batterydata-lmi-sun-4700mah.dtsi"
+	};
+
+    maxim_ds28e16: maxim_ds28e16 {
+	    status = "ok";
+	    compatible = "maxim,ds28e16";
+	    label = "max_ds28e16";
+	    maxim,version = <1>;
+    };
+
+	onewire_gpio: onewire_gpio {
+		status = "ok";
+		compatible = "xiaomi,onewire_gpio";
+		label = "xm_onewire";
+		xiaomi,version = <1>;
+		xiaomi,ow_gpio = <&tlmm 9 0x00>;
+		mi,onewire-gpio-cfg-addr = <0x0F909000 0x4>;
+		xiaomi,gpio_number = <9>;
+		pinctrl-names = "onewire_active", "onewire_sleep";
+		pinctrl-0 = <&onewire_gpio_active>;
+		pinctrl-1 = <&onewire_gpio_sleep>;
+	};
+};
+
+&qupv3_se15_i2c {
+	bq25970: bq25970-standalone {
+		compatible = "ti,bq2597x-standalone";
+		reg = <0x66>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <157 0x2002>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&bq2597x_int_default>;
+
+		/* Configure OCP/OVP/UCP features */
+		ti,bq2597x,bat-ovp-threshold = <4500>;
+		ti,bq2597x,bat-ovp-alarm-threshold = <4470>;
+		ti,bq2597x,bat-ocp-threshold = <10000>;
+		ti,bq2597x,bat-ocp-alarm-threshold = <9500>;
+
+		ti,bq2597x,bus-ovp-threshold = <12000>;
+		ti,bq2597x,bus-ovp-alarm-threshold = <11000>;
+		ti,bq2597x,bus-ocp-threshold = <4750>;
+		ti,bq2597x,bus-ocp-alarm-threshold = <4500>;
+
+		ti,bq2597x,bat-ucp-alarm-threshold = <2000>;
+
+		ti,bq2597x,bat-therm-threshold = <0x15>;	/*4.1%*/
+		ti,bq2597x,bus-therm-threshold = <0x15>;	/*4.1%*/
+		ti,bq2597x,die-therm-threshold = <125>;
+
+		ti,bq2597x,ac-ovp-threshold = <12>;
+		ti,bq2597x,sense-resistor-mohm = <2>;
+
+		/* Disable TI pump OCP/OVP/UCP features */
+		ti,bq2597x,bat-therm-disable;
+		ti,bq2597x,bus-therm-disable;
+		ti,bq2597x,die-therm-disable;
+
+		ti,bq2597x,bat-ocp-alarm-disable;
+		ti,bq2597x,bat-ocp-disable;
+
+		ti,bq2597x,bat-ovp-alarm-disable;
+		ti,bq2597x,bat-ovp-disable;
+
+		ti,bq2597x,bat-ucp-alarm-disable;
+
+		ti,bq2597x,bus-ocp-alarm-disable;
+		ti,bq2597x,bus-ocp-disable;
+		ti,bq2597x,bus-ovp-alarm-disable;
+	};
+};
+
+&pm8150b_charger {
+	status = "ok";
+	qcom,battery-data = <&lmi_batterydata>;
+};
+
+&pm8150b_fg {
+	status = "ok";
+	qcom,sun-profile-only;
+	qcom,battery-data = <&lmi_batterydata>;
+};

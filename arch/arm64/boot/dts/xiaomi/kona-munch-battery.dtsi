@@ -1,0 +1,139 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&google_charger {
+	google,thermal-mitigation = <4600000 4300000 3500000 
+		3000000 2500000 2000000 1500000 1000000 500000>;
+};
+
+&google_battery {
+	google,chg-battery-capacity = <4500>;
+
+	google,ttf-adapter = <3000>;
+	google,ttf-soc-table = <50 58 76 83 87 91 93 100>;
+	google,ttf-elap-table = <38 44 58 76 89 121 165 191>;
+	google,ttf-tier-table = <0 59 77>;
+};
+
+&soc {
+	munch_batterydata: qcom,battery-data {
+		qcom,batt-id-range-pct = <15>;
+		#include "jeita-step-cfg-munch.dtsi"
+	};
+};
+
+&qupv3_se15_i2c {
+	status = "ok";
+
+	ln8000: ln8000 {
+		compatible = "lionsemi,ln8000-master";
+		reg = <0x51>;
+
+		/* bank <bit-idx> <flags: active-low> */
+		pinctrl-names = "bq2597x_master_irq";
+		pinctrl-0 = <&bq2597x_int_default &bq2597x_int_suspend>;
+
+		charger_name = "tertiary_chg";
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <68 0x2002>;
+
+		/* device configuration */
+		ln8000_charger,bat-ovp-threshold = <4710>;
+		ln8000_charger,bat-ovp-alarm-threshold = <4675>;
+		ln8000_charger,bus-ovp-threshold = <13000>;
+		ln8000_charger,bus-ovp-alarm-threshold = <11000>;
+		ln8000_charger,bus-ocp-threshold = <3750>;
+		ln8000_charger,bus-ocp-alarm-threshold = <3500>;
+		ln8000_charger,ntc-alarm-cfg  = <226>;
+		/* protection enable/disable flags
+		 *   vbat-ovp-disable
+		 *   vbat-reg-disable
+		 *   iin-ocp-disable
+		 *   iin-reg-disable
+		 *   tbus-mon-disable
+		 *   tbat-mon-disable
+		 *   tdie-prot-disable
+		 *   tdie-reg-disable
+		 *   revcurr-prot-disable
+		 */
+		ln8000_charger,tdie-prot-disable;
+		ln8000_charger,tbus-mon-disable;
+		ln8000_charger,tbat-mon-disable;
+		ln8000_charger,iin-ocp-disable;
+		ln8000_charger,iin-reg-disable;
+		ln8000_charger,tdie-reg-disable;
+		ln8000_charger,vbat-reg-disable;
+	};
+};
+
+&qupv3_se11_i2c {
+	status = "ok";
+
+	ln8000_secondary: ln8000-secondary {
+		compatible = "lionsemi,ln8000-slave";
+		reg = <0x51>;
+
+		charger_name = "quaternary_chg";
+		/* bank <bit-idx> <flags: active-low> */
+		interrupt-parent = <&tlmm>;
+		interrupts = <64 0x2002>;
+
+		/* device configuration */
+		ln8000_charger,bat-ovp-threshold = <4710>;
+		ln8000_charger,bat-ovp-alarm-threshold = <4675>;
+		ln8000_charger,bus-ovp-threshold = <13000>;
+		ln8000_charger,bus-ovp-alarm-threshold = <11000>;
+		ln8000_charger,bus-ocp-threshold = <3750>;
+		ln8000_charger,bus-ocp-alarm-threshold = <3500>;
+		ln8000_charger,ntc-alarm-cfg  = <226>;
+		/* protection enable/disable flags
+		 *   vbat-ovp-disable
+		 *   vbat-reg-disable
+		 *   iin-ocp-disable
+		 *   iin-reg-disable
+		 *   tbus-mon-disable
+		 *   tbat-mon-disable
+		 *   tdie-prot-disable
+		 *   tdie-reg-disable
+		 *   revcurr-prot-disable
+		 */
+		ln8000_charger,tdie-prot-disable;
+		ln8000_charger,tbus-mon-disable;
+		ln8000_charger,tbat-mon-disable;
+		ln8000_charger,iin-ocp-disable;
+		ln8000_charger,iin-reg-disable;
+		ln8000_charger,tdie-reg-disable;
+		ln8000_charger,vbat-reg-disable;
+	};
+};
+
+&qupv3_se16_i2c {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "ok";
+
+	bq27z561 {
+		compatible = "ti,bq27z561";
+		reg = <0x55>;
+	};
+};
+
+&pm8150b_charger {
+	status = "ok";
+	qcom,battery-data = <&munch_batterydata>;
+};
+
+&pm8150b_fg {
+	status = "disabled";
+};

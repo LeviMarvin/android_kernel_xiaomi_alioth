@@ -1,0 +1,256 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&mdss_mdp {
+	dsi_j3s_37_02_0a_dsc_video: qcom,mdss_dsi_j3s_37_02_0a_dsc_video {
+		qcom,mdss-dsi-panel-name = "xiaomi 37 02 0a video mode dsc dsi panel";
+		google,mdss-dsi-panel-vendor = "HUAXING";
+		qcom,mdss-dsi-panel-type = "dsi_video_mode";
+		qcom,mdss-dsi-panel-physical-type = "ips";
+		qcom,dsi-ctrl-num = <0>;
+		qcom,dsi-phy-num = <0>;
+
+		qcom,mdss-dsi-virtual-channel-id = <0>;
+		qcom,mdss-dsi-bpp = <24>;
+		qcom,mdss-dsi-color-order = "rgb_swap_rgb";
+		qcom,mdss-dsi-traffic-mode = "non_burst_sync_event";
+		qcom,mdss-dsi-lane-map = "lane_map_0123";
+		qcom,mdss-dsi-lane-0-state;
+		qcom,mdss-dsi-lane-1-state;
+		qcom,mdss-dsi-lane-2-state;
+		qcom,mdss-dsi-lane-3-state;
+
+		qcom,mdss-dsi-dma-trigger = "trigger_sw";
+		qcom,mdss-dsi-mdp-trigger = "none";
+		qcom,mdss-dsi-wr-mem-start = <0x2c>;
+		qcom,mdss-dsi-wr-mem-continue = <0x3c>;
+
+		qcom,mdss-dsi-te-pin-select = <1>;
+		qcom,mdss-dsi-te-dcs-command = <1>;
+		qcom,mdss-dsi-te-check-enable;
+		qcom,mdss-dsi-te-using-te-pin;
+
+		qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+		qcom,mdss-dsi-bl-min-level = <4>;
+		qcom,mdss-dsi-bl-max-level = <4095>;
+		qcom,mdss-brightness-max-level = <4095>;
+		qcom,mdss-brightness-init-level = <410>;
+		qcom,bl-update-flag = "delay_until_first_frame";
+
+		qcom,mdss-dsi-reset-sequence = <1 2>, <0 10>, <1 5>, <0 1>, <1 10>;
+		qcom,mdss-dsi-lp11-init;
+
+		qcom,mdss-pan-physical-width-dimension = <70>;
+		qcom,mdss-pan-physical-height-dimension = <155>;
+
+		qcom,mdss-dsi-pan-enable-dynamic-fps;
+		qcom,mdss-dsi-pan-fps-update = "dfps_immediate_porch_mode_vfp";
+		qcom,dsi-supported-dfps-list = <120 60>;
+
+		qcom,mdss-dsi-display-timings {
+			timing@0{
+				qcom,mdss-dsi-panel-framerate = <144>;
+				qcom,mdss-dsi-panel-width = <1080>;
+				qcom,mdss-dsi-panel-height = <2400>;
+				qcom,mdss-dsi-h-pulse-width = <12>;
+				qcom,mdss-dsi-h-back-porch = <43>;
+				qcom,mdss-dsi-h-front-porch = <40>;
+				qcom,mdss-dsi-h-sync-skew = <0>;
+				qcom,mdss-dsi-v-pulse-width = <2>;
+				qcom,mdss-dsi-v-back-porch = <26>;
+				qcom,mdss-dsi-v-front-porch = <28>;
+				qcom,mdss-dsi-h-sync-pulse = <0>;
+				qcom,mdss-dsi-h-left-border = <0>;
+				qcom,mdss-dsi-h-right-border = <0>;
+				qcom,mdss-dsi-v-top-border = <0>;
+				qcom,mdss-dsi-v-bottom-border = <0>;
+
+				qcom,mdss-dsi-on-command = [
+					/* Panel ON */
+					15 01 00 00 00 00 02 FF E0
+					15 00 00 00 00 00 02 FB 01
+					15 00 00 00 00 00 02 35 82
+					15 01 00 00 00 00 02 FF F0
+					15 00 00 00 00 00 02 FB 01
+					15 00 00 00 00 00 02 5A 00
+					15 00 00 00 00 00 02 9F 19
+					15 00 00 00 00 00 02 9C 00
+					15 01 00 00 00 00 02 FF D0
+					15 00 00 00 00 00 02 FB 01
+					15 00 00 00 00 00 02 FF C0
+					15 00 00 00 00 00 02 FB 01
+					15 01 00 00 00 00 02 9C 11
+					15 00 00 00 00 00 02 9D 11
+					15 01 00 00 00 00 02 FF 23
+					15 00 00 00 00 00 02 FB 01
+					15 00 00 00 00 00 02 00 80
+					15 00 00 00 00 00 02 01 84
+					15 00 00 00 00 00 02 05 2D
+					15 00 00 00 00 00 02 06 00
+					15 00 00 00 00 00 02 07 00
+					15 00 00 00 00 00 02 08 01
+					15 00 00 00 00 00 02 09 45
+					15 00 00 00 00 00 02 11 01
+					15 00 00 00 00 00 02 12 95
+					15 00 00 00 00 00 02 15 68
+					15 00 00 00 00 00 02 16 0B
+					15 01 00 00 00 00 02 29 0A
+					/* CABC/PWM settings */
+					15 01 00 00 00 00 02 30 FF
+					15 01 00 00 00 00 02 31 FE
+					15 01 00 00 00 00 02 32 FD
+					15 01 00 00 00 00 02 33 FB
+					15 01 00 00 00 00 02 34 F8
+					15 01 00 00 00 00 02 35 F5
+					15 01 00 00 00 00 02 36 F3
+					15 01 00 00 00 00 02 37 F2
+					15 01 00 00 00 00 02 38 F2
+					15 01 00 00 00 00 02 39 F2
+					15 01 00 00 00 00 02 3A EF
+					15 01 00 00 00 00 02 3B EC
+					15 01 00 00 00 00 02 3D E9
+					15 01 00 00 00 00 02 3F E5
+					15 01 00 00 00 00 02 40 E5
+					15 01 00 00 00 00 02 41 E5
+					15 01 00 00 00 00 02 2A 13
+					15 01 00 00 00 00 02 45 FF
+					15 01 00 00 00 00 02 46 F4
+					15 01 00 00 00 00 02 47 E7
+					15 01 00 00 00 00 02 48 DA
+					15 01 00 00 00 00 02 49 CD
+					15 01 00 00 00 00 02 4A C0
+					15 01 00 00 00 00 02 4B B3
+					15 01 00 00 00 00 02 4C B2
+					15 01 00 00 00 00 02 4D B2
+					15 01 00 00 00 00 02 4E B2
+					15 01 00 00 00 00 02 4F 99
+					15 01 00 00 00 00 02 50 80
+					15 01 00 00 00 00 02 51 68
+					15 01 00 00 00 00 02 52 66
+					15 01 00 00 00 00 02 53 66
+					15 01 00 00 00 00 02 54 66
+					15 01 00 00 00 00 02 2B 0E
+					15 01 00 00 00 00 02 58 FF
+					15 01 00 00 00 00 02 59 FB
+					15 01 00 00 00 00 02 5A F7
+					15 01 00 00 00 00 02 5B F3
+					15 01 00 00 00 00 02 5C EF
+					15 01 00 00 00 00 02 5D E3
+					15 01 00 00 00 00 02 5E DA
+					15 01 00 00 00 00 02 5F D8
+					15 01 00 00 00 00 02 60 D8
+					15 01 00 00 00 00 02 61 D8
+					15 01 00 00 00 00 02 62 CB
+					15 01 00 00 00 00 02 63 BF
+					15 01 00 00 00 00 02 64 B3
+					15 01 00 00 00 00 02 65 B2
+					15 01 00 00 00 00 02 66 B2
+					15 01 00 00 00 00 02 67 B2
+					15 01 00 00 00 00 02 FF 27
+					15 01 00 00 00 00 02 FB 01
+					15 01 00 00 00 00 02 40 20
+					/* ESD Settings */
+					15 01 00 00 00 00 02 FF 10
+					39 00 00 00 00 00 03 51 0B BB
+					15 00 00 00 00 00 02 53 24
+					15 01 00 00 00 00 02 FF 10
+					15 00 00 00 00 00 02 FB 01
+					15 00 00 00 00 00 02 35 00
+					15 01 00 00 46 00 02 11 00
+					15 01 00 00 00 00 02 29 00
+					15 01 00 00 00 00 02 FF 27
+					15 01 00 00 00 00 02 FB 01
+					15 01 00 00 00 00 02 3F 01
+					15 01 00 00 00 00 02 43 08
+					15 01 00 00 00 00 02 40 25
+					15 01 00 00 00 00 02 FF 10
+				];
+				qcom,mdss-dsi-off-command = [
+					15 01 00 00 00 00 02 FF 27
+					15 01 00 00 00 00 02 FB 01
+					15 01 00 00 00 00 02 3F 00
+					15 01 00 00 00 00 02 FF 10
+					05 01 00 00 00 00 02 28 00
+					05 01 00 00 46 00 02 10 00
+				];
+				qcom,mdss-dsi-on-command-state = "dsi_lp_mode";
+				qcom,mdss-dsi-off-command-state = "dsi_hs_mode";
+
+				qcom,compression-mode = "dsc";
+				qcom,mdss-dsc-slice-height = <20>;
+				qcom,mdss-dsc-slice-width = <540>;
+				qcom,mdss-dsc-slice-per-pkt = <2>;
+				qcom,mdss-dsc-bit-per-component = <8>;
+				qcom,mdss-dsc-bit-per-pixel = <8>;
+				qcom,mdss-dsc-block-prediction-enable;
+
+				qcom,mdss-dsi-panel-phy-timings = [
+					00 21 08 08 25 22 09
+					08 06 02 04 00 1B 18
+				];
+
+				/* 1xLM, 1xDSC Enc, 1xDSI Intf */
+				qcom,display-topology = <1 1 1>;
+				qcom,default-topology-index = <0>;
+			};
+		};
+
+		google,hbm-ranges {
+			google,dsi-hbm-exit-command = [
+				/* Disable high brightness */
+				15 01 00 00 00 00 02 FF 10
+				39 01 00 00 00 00 03 51 0B BB
+			];
+			google,dsi-hbm-commands-state = "dsi_lp_mode";
+
+			hbm-range@0 {
+				google,dsi-hbm-range-brightness-threshold = <1>;
+
+				google,dsi-hbm-range-bl-min-level = <0x8>;
+				google,dsi-hbm-range-bl-max-level = <0xfff>;
+				google,dsi-hbm-range-entry-command = [
+					/* Disable high brightness */
+					15 01 00 00 00 00 02 FF 10
+					39 01 00 00 00 00 03 51 0B BB
+				];
+				google,dsi-hbm-range-commands-state =
+					"dsi_lp_mode";
+			};
+
+			hbm-range@1 {
+				/* Normal brightness mode covers ~2 to 430
+				 * nits, using panel brightness values up to
+				 * 0xfff. HBM extends the range to 650 nits,
+				 * and remaps user brightness 1-4095 to cover
+				 * this extended range. In this extended range,
+				 * 430 nits / 0xfff corresponds to user
+				 * brightness 731. Panel brightness is not
+				 * adjustable in the 430-650 nit segment.
+				 */
+				google,dsi-hbm-range-brightness-threshold =
+					<731>;
+
+				google,dsi-hbm-range-bl-min-level = <0xfff>;
+				google,dsi-hbm-range-bl-max-level = <0xfff>;
+
+				google,dsi-hbm-range-entry-command = [
+					/* Enable high brightness */
+					15 01 00 00 00 00 02 FF 10
+					39 01 00 00 00 00 03 51 0E 8C
+				];
+				google,dsi-hbm-range-commands-state =
+					"dsi_lp_mode";
+			};
+		};
+	};
+};

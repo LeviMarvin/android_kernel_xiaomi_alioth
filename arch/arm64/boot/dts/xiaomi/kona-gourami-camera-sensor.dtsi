@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include <dt-bindings/clock/qcom,camcc-kona.h>
+#include "kona-gourami-camera-pmic.dtsi"
+
+&cam_csid_lite1 {
+    clocks = <&clock_camcc CAM_CC_IFE_LITE_CSID_CLK_SRC>,
+			 <&clock_camcc CAM_CC_CPHY_RX_CLK_SRC>,
+			 <&clock_camcc CAM_CC_IFE_LITE_CPHY_RX_CLK>,
+			 <&clock_camcc CAM_CC_IFE_LITE_CLK_SRC>,
+			 <&clock_camcc CAM_CC_IFE_LITE_AHB_CLK>,
+			 <&clock_camcc CAM_CC_IFE_LITE_CSID_CLK>,
+			 <&clock_camcc CAM_CC_IFE_LITE_CLK>;
+};

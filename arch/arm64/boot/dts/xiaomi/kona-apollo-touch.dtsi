@@ -1,0 +1,61 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&soc {
+	xiaomi_touch {
+		status = "ok";
+		compatible = "xiaomi-touch";
+		touch,name = "xiaomi-touch";
+	};
+
+	ts_novatek {
+		compatible = "novatek,NVT-ts-spi";
+		status = "ok";
+
+		spi-max-frequency = <15000000>;
+		novatek,reset-gpio = <&tlmm 38 0x00>;
+		novatek,irq-gpio = <&tlmm 39 0x2001>;
+		/* novatek,reset-tddi = <&pm8150l_gpios 3 0>; */
+		pinctrl-names = "pmx_ts_active", "pmx_ts_suspend";
+		pinctrl-0 = <&ts_int_active &ts_reset_active &ts_cs_active>;
+		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend &ts_cs_suspend>;
+
+		/* 672A */
+		novatek,swrst-n8-addr = <0x03F0FE>;
+		novatek,spi-rd-fast-addr = <0x03F310>;
+
+		novatek,config-array-size = <1>;
+		novatek,cfg_0 {
+			novatek,tp-vendor = <0x41>;
+			novatek,display-maker = <0x37>;
+			novatek,glass-vendor = <0x00>;
+			novatek,fw-name = "novatek_nt36675_j3s_fw01.bin";
+			novatek,mp-name = "novatek_nt36675_j3s_mp01.bin";
+			novatek,clicknum-file-name = "nvt+ebbg";
+		};
+	};
+};
+
+&qupv3_se4_spi {
+	status = "ok";
+
+	pinctrl-0 = <&qupv3_se4_spi_active>;
+	pinctrl-1 = <&qupv3_se4_spi_sleep>;
+
+	touch_spi@0 {
+		compatible = "xiaomi,spi-for-tp";
+		reg = <0>;
+		status = "ok";
+		spi-max-frequency = <15000000>;
+	};
+};

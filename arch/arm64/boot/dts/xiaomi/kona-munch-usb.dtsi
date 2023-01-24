@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&usb_con {
+	sink-pdos = <PDO_FIXED(5000, 3000, PDO_FIXED_USB_COMM
+					   | PDO_FIXED_DATA_SWAP
+					   | PDO_FIXED_DUAL_ROLE)
+			  PDO_FIXED(9000, 3000, 0)
+			  PDO_PPS_APDO(5000, 11000, 3000)>;
+};
+
+&usb2_phy0 {
+	qcom,param-override-seq =
+		<0x67 0x6c
+		 0x88 0x70>;
+};

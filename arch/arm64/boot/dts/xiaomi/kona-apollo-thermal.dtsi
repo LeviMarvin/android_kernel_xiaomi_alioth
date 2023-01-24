@@ -1,0 +1,345 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include <dt-bindings/thermal/thermal.h>
+
+&thermal_zones {
+	skin-virt-cpu {
+		polling-delay-passive = <1000>;
+		polling-delay = <5000>;
+		thermal-governor = "step_wise";
+		wake-capable-sensor;
+		trips {
+			skin_cpu_light: skin-cpu-light {
+				temperature = <39000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_cpu_moderate_pre_lv1: skin-cpu-moderate-pre-lv1 {
+				temperature = <41000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_cpu_moderate_pre_lvl2: skin-cpu-moderate-pre-lv2 {
+				temperature = <43000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_cpu_moderate: skin-cpu-moderate {
+				temperature = <45000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_cpu_severe: skin-cpu-severe {
+				temperature = <49000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+		};
+		cooling-maps {
+			/* light throttling */
+			cpu4-turbo {
+				trip = <&skin_cpu_light>;
+				cooling-device =
+					<&CPU4 4 4>;
+			};
+			cpu7-turbo {
+				trip = <&skin_cpu_light>;
+				cooling-device =
+					<&CPU7 3 3>;
+			};
+			/* moderate pre level 1 throttling */
+			cpu0-nominal-l1 {
+				trip = <&skin_cpu_moderate_pre_lv1>;
+				cooling-device =
+					<&CPU0 1 1>;
+			};
+			cpu4-nominal-l1 {
+				trip = <&skin_cpu_moderate_pre_lv1>;
+				cooling-device =
+					<&CPU4 5 5>;
+			};
+			cpu7-nominal-l1 {
+				trip = <&skin_cpu_moderate_pre_lv1>;
+				cooling-device =
+					<&CPU7 8 8>;
+			};
+			/* moderate pre level 2 throttling */
+			cpu0-nominal-l2 {
+				trip = <&skin_cpu_moderate_pre_lvl2>;
+				cooling-device =
+					<&CPU0 3 3>;
+			};
+			cpu4-nominal-l2 {
+				trip = <&skin_cpu_moderate_pre_lvl2>;
+				cooling-device =
+					<&CPU4 7 7>;
+			};
+			cpu7-nominal-l2 {
+				trip = <&skin_cpu_moderate_pre_lvl2>;
+				cooling-device =
+					<&CPU7 9 9>;
+			};
+			/* moderate hrottling */
+			cpu0-nominal {
+				trip = <&skin_cpu_moderate>;
+				cooling-device =
+					<&CPU0 5 5>;
+			};
+			cpu4-nominal {
+				trip = <&skin_cpu_moderate>;
+				cooling-device =
+					<&CPU4 10 10>;
+			};
+			cpu7-nominal {
+				trip = <&skin_cpu_moderate>;
+				cooling-device =
+					<&CPU7 11 11>;
+			};
+			/* severe throttling */
+			cpu0-svs-l1 {
+				trip = <&skin_cpu_severe>;
+				cooling-device =
+					<&CPU0 12 12>;
+			};
+			cpu4-svs-l1 {
+				trip = <&skin_cpu_severe>;
+				cooling-device =
+					<&CPU4 15 15>;
+			};
+			cpu7-svs-l1 {
+				trip = <&skin_cpu_severe>;
+				cooling-device =
+					<&CPU7 18 18>;
+			};
+		};
+	};
+
+	skin-virt-charge {
+		polling-delay-passive = <1000>;
+		polling-delay = <5000>;
+		thermal-governor = "step_wise";
+		wake-capable-sensor;
+		trips {
+			skin_therm1: skin-therm-1 {
+				temperature = <39000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_therm2: skin-therm-2 {
+				temperature = <40000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_therm3: skin-therm-3 {
+				temperature = <41000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_therm4: skin-therm-4 {
+				temperature = <41500>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_therm5: skin-therm-5 {
+				temperature = <42000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_therm6: skin-therm-6 {
+				temperature = <42500>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_therm7: skin-therm-7 {
+				temperature = <43500>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_therm8: skin-therm-8 {
+				temperature = <44000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_therm9: skin-therm-9 {
+				temperature = <44500>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+		};
+		cooling-maps {
+			wired-charge-ibat-4300mA {
+				trip = <&skin_therm1>;
+				cooling-device =
+					<&google_charger 1 1>;
+			};
+			wired-charge-ibat-3500mA {
+				trip = <&skin_therm2>;
+				cooling-device =
+					<&google_charger 2 2>;
+			};
+			wired-charge-ibat-3000mA {
+				trip = <&skin_therm3>;
+				cooling-device =
+					<&google_charger 3 3>;
+			};
+			wired-charge-ibat-2500mA {
+				trip = <&skin_therm4>;
+				cooling-device =
+					<&google_charger 4 4>;
+			};
+			wired-charge-ibat-2000mA {
+				trip = <&skin_therm5>;
+				cooling-device =
+					<&google_charger 5 5>;
+			};
+			wired-charge-ibat-1500mA {
+				trip = <&skin_therm6>;
+				cooling-device =
+					<&google_charger 6 6>;
+			};
+			wired-charge-ibat-1000mA {
+				trip = <&skin_therm7>;
+				cooling-device =
+					<&google_charger 7 7>;
+			};
+			wired-charge-ibat-500mA {
+				trip = <&skin_therm8>;
+				cooling-device =
+					<&google_charger 8 8>;
+			};
+			wired-charge-disabled {
+				trip = <&skin_therm9>;
+				cooling-device = <&google_charger
+					THERMAL_MAX_LIMIT THERMAL_MAX_LIMIT>;
+			};
+		};
+	};
+
+	skin-virt {
+		polling-delay-passive = <1000>;
+		polling-delay = <5000>;
+		thermal-governor = "step_wise";
+		wake-capable-sensor;
+		trips {
+			skin_light: skin-light {
+				temperature = <39000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_moderate_pre_lv1: skin-moderate-pre-lv1 {
+				temperature = <41000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_moderate_pre_lv2: skin-moderate-pre-lv2 {
+				temperature = <43000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_moderate_pre_lv3: skin-moderate-pre-lv3 {
+				temperature = <45000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_severe: skin-severe {
+				temperature = <51000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_critical: skin-critical {
+				temperature = <55000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_emergency_pre_lv1: skin-emergency-pre_lv1 {
+				temperature = <59000>;
+				hysteresis = <1000>;
+				type = "passive";
+			};
+			skin_backup_shutdown: skin-backup-shutdown {
+				temperature = <61000>;
+				hysteresis = <1000>;
+				type = "critical";
+			};
+		};
+		cooling-maps {
+			/* moderate pre level 1 throttling */
+			gpu-turbo {
+				trip = <&skin_moderate_pre_lv1>;
+				cooling-device =
+					<&msm_gpu 1 1>;
+			};
+			/* moderate pre level 2 throttling */
+			gpu-nom-l1 {
+				trip = <&skin_moderate_pre_lv2>;
+				cooling-device =
+					<&msm_gpu 2 2>;
+			};
+			/* moderate pre level 3 throttling */
+			gpu-nom {
+				trip = <&skin_moderate_pre_lv3>;
+				cooling-device =
+					<&msm_gpu 3 3>;
+			};
+			/* severe throttling */
+			gpu-svs-l2 {
+				trip = <&skin_severe>;
+				cooling-device =
+					<&msm_gpu 4 4>;
+			};
+			/* critical throttling */
+			gpu-svs-l1 {
+				trip = <&skin_critical>;
+				cooling-device =
+					<&msm_gpu 5 5>;
+			};
+			cpu0-svs {
+				trip = <&skin_critical>;
+				cooling-device =
+					<&CPU0 5 5>;
+			};
+			cpu4-svs {
+				trip = <&skin_critical>;
+				cooling-device =
+					<&CPU4 13 13>;
+			};
+			cpu7-svs {
+				trip = <&skin_critical>;
+				cooling-device =
+					<&CPU7 16 16>;
+			};
+			/* emergency pre level 1 throttling */
+			gpu-svs {
+				trip = <&skin_emergency_pre_lv1>;
+				cooling-device =
+					<&msm_gpu THERMAL_MAX_LIMIT THERMAL_MAX_LIMIT>;
+			};
+			cpu0-low-svs {
+				trip = <&skin_emergency_pre_lv1>;
+				cooling-device =
+					<&CPU0 THERMAL_MAX_LIMIT THERMAL_MAX_LIMIT>;
+			};
+			cpu4-low-svs {
+				trip = <&skin_emergency_pre_lv1>;
+				cooling-device =
+					<&CPU4 THERMAL_MAX_LIMIT THERMAL_MAX_LIMIT>;
+			};
+			cpu7-low-svs {
+				trip = <&skin_emergency_pre_lv1>;
+				cooling-device =
+					<&CPU7 THERMAL_MAX_LIMIT THERMAL_MAX_LIMIT>;
+			};
+		};
+	};
+};

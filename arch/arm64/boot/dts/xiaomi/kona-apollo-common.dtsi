@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "kona-gourami-common.dtsi"
+#include "kona-apollo-audio.dtsi"
+#include "kona-apollo-battery.dtsi"
+#include "kona-apollo-camera-sensor.dtsi"
+#include "kona-apollo-display.dtsi"
+#include "kona-apollo-fingerprint.dtsi"
+#include "kona-apollo-haptics.dtsi"
+#include "kona-apollo-leds.dtsi"
+#include "kona-apollo-pcie.dtsi"
+#include "kona-apollo-pinctrl.dtsi"
+#include "kona-apollo-regulators.dtsi"
+#include "kona-apollo-thermal.dtsi"
+#include "kona-apollo-touch.dtsi"
+#include "kona-apollo-usb.dtsi"

@@ -1,0 +1,48 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&qupv3_se15_i2c {
+    status = "ok";
+
+    akm09970 {
+        compatible = "akm,akm09970";
+        reg = <0xD>;
+        akm,gpio-reset = <&tlmm 131 0x00>;
+        akm,gpio-irq = <&tlmm 133 0x00>;
+        vdd-supply = <&pm8150a_l8>;
+
+        pinctrl-names = "akm09970_gpio_active", "akm09970_gpio_suspend";
+        pinctrl-0 = <&akm_irq_active &akm_reset_active>;
+        pinctrl-1 = <&akm_irq_suspend &akm_reset_suspend>;
+        status = "ok";
+    };
+};
+
+&soc{
+	ti,drv8846 {
+		compatible = "ti,drv8846";
+		cell-index = <0>;
+		reg = <0x00 0x00>;
+		pwms = <&pm8150l_pwm 1 1000000>;
+		motor,gpio-mode0 = <&tlmm 158 0x00>;
+		motor,gpio-mode1 = <&tlmm 154 0x00>;
+		motor,gpio-sleep = <&tlmm 70 0x00>;
+		motor,gpio-dir = <&tlmm 137 0x00>;
+		motor,gpio-pwren = <&tlmm 153 0x00>;
+		motor,step-mode = <2>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&pwm_out_gpio10_default &motor_gpio_default>;
+		status = "ok";
+	};
+};

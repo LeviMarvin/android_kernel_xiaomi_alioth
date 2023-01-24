@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "kona-gourami-common.dtsi"
+#include "kona-lmi-audio.dtsi"
+#include "kona-lmi-battery.dtsi"
+#include "kona-lmi-camera-sensor.dtsi"
+#include "kona-lmi-display.dtsi"
+#include "kona-lmi-fingerprint.dtsi"
+#include "kona-lmi-haptics.dtsi"
+#include "kona-lmi-leds.dtsi"
+#include "kona-lmi-motor.dtsi"
+#include "kona-lmi-pcie.dtsi"
+#include "kona-lmi-pinctrl.dtsi"
+#include "kona-lmi-regulators.dtsi"
+#include "kona-lmi-thermal.dtsi"
+#include "kona-lmi-touch.dtsi"
+#include "kona-lmi-usb.dtsi"

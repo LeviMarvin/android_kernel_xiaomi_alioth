@@ -1,0 +1,61 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&dai_mi2s2 {
+	qcom,msm-mi2s-rx-lines = <2>;
+	qcom,msm-mi2s-tx-lines = <1>;
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&tert_mi2s_sck_active &tert_mi2s_ws_active
+			&tert_mi2s_sd0_active &tert_mi2s_sd1_active>;
+	pinctrl-1 = <&tert_mi2s_sck_sleep &tert_mi2s_ws_sleep
+			&tert_mi2s_sd0_sleep &tert_mi2s_sd1_sleep>;
+};
+
+&kona_snd {
+	qcom,msm-mbhc-usbc-workaround = <1>;
+};
+
+&qupv3_se3_i2c {
+	status = "ok";
+
+	/* TOP Speaker */
+	tfa98xx_r: tfa98xx_r {
+		compatible = "nxp,tfa98xx";
+		reset-gpio = <&tlmm 114 0>;
+		irq-gpio = <&tlmm 113 0>;
+		spk-sw-gpio = <&tlmm 127 0>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <113 0>;
+		interrupt-names = "smartpa_irq";
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&smartpa_top_int_active &smartpa_enable_top_active>;
+		pinctrl-1 = <&smartpa_top_int_suspend &smartpa_enable_top_suspend>;
+		reg = <0x34>;
+		status = "ok";
+	};
+
+    /* Botton Speaker */
+	tfa98xx_l: tfa98xx_l {
+		compatible = "nxp,tfa98xx";
+		reset-gpio = <&tlmm 140 0>;
+		irq-gpio = <&tlmm 112 0>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <112 0>;
+		interrupt-names = "smartpa_irq";
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&smartpa_bot_int_active &smartpa_enable_bot_active>;
+		pinctrl-1 = <&smartpa_bot_int_suspend &smartpa_enable_bot_suspend>;
+		reg = <0x35>;
+		status = "ok";
+	};
+};

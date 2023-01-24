@@ -1,0 +1,116 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&pm8150l_rgb_led {
+	status = "disabled";
+};
+
+&qupv3_se16_i2c {
+	status = "ok";
+
+	aw2015 {
+		compatible = "awinic,aw2015_led";
+		reg = <0x64>;
+
+		xiaomi,right-led-en-gpio = <&tlmm 125 0>;
+
+		aw2015,red {
+			aw2015,name = "red";
+			aw2015,id = <0>;
+			aw2015,imax = <0>;
+			aw2015,led-current = <255>;
+			aw2015,max-brightness = <30>;
+			aw2015,rise-time-ms = <6>;
+			aw2015,hold-time-ms = <0>;
+			aw2015,fall-time-ms = <6>;
+			aw2015,off-time-ms = <4>;
+			linux,default-trigger = "timer";
+		};
+
+		aw2015,green {
+			aw2015,name = "green";
+			aw2015,id = <1>;
+			aw2015,imax = <0>;
+			aw2015,led-current = <255>;
+			aw2015,max-brightness = <30>;
+			aw2015,rise-time-ms = <6>;
+			aw2015,hold-time-ms = <0>;
+			aw2015,fall-time-ms = <6>;
+			aw2015,off-time-ms = <4>;
+			linux,default-trigger = "timer";
+		};
+
+		aw2015,blue {
+			aw2015,name = "blue";
+			aw2015,id = <2>;
+			aw2015,imax = <0>;
+			aw2015,led-current = <255>;
+			aw2015,max-brightness = <30>;
+			aw2015,rise-time-ms = <6>;
+			aw2015,hold-time-ms = <0>;
+			aw2015,fall-time-ms = <6>;
+			aw2015,off-time-ms = <4>;
+			linux,default-trigger = "timer";
+		};
+	};
+};
+
+&qupv3_se9_i2c {
+	status = "ok";
+
+	aw2015 {
+		compatible = "awinic,aw2015_led";
+		reg = <0x64>;
+
+		xiaomi,rgb-led-right;
+
+		aw2015,red {
+			aw2015,name = "red-right";
+			aw2015,id = <0>;
+			aw2015,imax = <1>;
+			aw2015,led-current = <255>;
+			aw2015,max-brightness = <255>;
+			aw2015,rise-time-ms = <6>;
+			aw2015,hold-time-ms = <0>;
+			aw2015,fall-time-ms = <6>;
+			aw2015,off-time-ms = <4>;
+			linux,default-trigger = "timer";
+		};
+
+		aw2015,green {
+			aw2015,name = "green-right";
+			aw2015,id = <1>;
+			aw2015,imax = <1>;
+			aw2015,led-current = <255>;
+			aw2015,max-brightness = <255>;
+			aw2015,rise-time-ms = <6>;
+			aw2015,hold-time-ms = <0>;
+			aw2015,fall-time-ms = <6>;
+			aw2015,off-time-ms = <4>;
+			linux,default-trigger = "timer";
+		};
+
+		aw2015,blue {
+			aw2015,name = "blue-right";
+			aw2015,id = <2>;
+			aw2015,imax = <1>;
+			aw2015,led-current = <255>;
+			aw2015,max-brightness = <255>;
+			aw2015,rise-time-ms = <6>;
+			aw2015,hold-time-ms = <0>;
+			aw2015,fall-time-ms = <6>;
+			aw2015,off-time-ms = <4>;
+			linux,default-trigger = "timer";
+		};
+	};
+};

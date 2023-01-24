@@ -1,0 +1,83 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&tlmm {
+	display_panel_vci_default: display_panel_vci_default {
+		mux {
+			pins = "gpio71";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio71";
+			drive-strength = <8>;
+			bias-disable = <0>;
+			output-high;
+		};
+	};
+};
+
+&tlmm {
+	goog,ignored-gpios = <28 29 30 31 40 41 43>;
+};
+
+&tlmm {
+	/* AW8697_RESET_N */
+	aw8697_gpio_reset: aw8697_gpio_reset {
+		mux {
+			pins = "gpio130";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio130";
+			drive-strength = <2>;
+			bias-disable;
+			output-low;
+		};
+	};
+    
+	/* AW8697_RESET_N, state device active*/
+	aw8697_gpio_reset_output_high: aw8697_gpio_reset_output_high {
+		mux {
+			pins = "gpio130";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio130";
+			drive-strength = <2>;
+			bias-disable;
+			output-high;
+		};
+	};
+    
+	/* AW8697_INTERRUPT_N */
+	aw8697_gpio_int: aw8697_gpio_int {
+		mux {
+			pins = "gpio129";
+			 function = "gpio";
+		};
+
+		config {
+			pins = "gpio129";
+			drive-strength = <2>;
+			bias-pull-up;
+			input-enable;
+		};
+	};
+};
+
+&smb_stat_default {
+	power-source = <1>;
+};

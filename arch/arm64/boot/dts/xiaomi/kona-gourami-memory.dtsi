@@ -1,0 +1,107 @@
+// SPDX-License-Identifier: GPL-2.0
+/* Copyright (c) 2016-2022, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/* kona-gourami memory includes go here */
+
+/*
+ * Reverved memory carveout is defined in TZ project:
+ * ssg/securemsm/trustzone/qsee/mink/oem/config/saipan/oem_config.xml
+*/
+
+/*
+ * the following carveout items are still defined in kona.dtsi:
+ * region              address    size
+ * ==========          ========== =========
+ * hyp_mem:            0x80000000 0x600000
+ * xbl_aop_mem:        0x80600000 0x260000
+ * cmd_db:             0x80860000 0x200000
+ * xbl_uefi_log:       0x80880000 0x140000
+ * smem_mem:           0x80900000 0x200000
+ * removed_mem:        0x80b00000 0x530000
+ * pil_camera_mem:     0x86200000 0x500000
+ * pil_wlan_fw_mem:    0x86700000 0x100000
+ * pil_ipa_fw_mem:     0x86800000 0x100000
+ * pil_ipa_gsi_mem:    0x86810000 0xa00000
+ * pil_gpu_mem:        0x8681a000 0x200000
+ * pil_npu_mem:        0x86900000 0x500000
+ * pil_video_mem:      0x86e00000 0x500000
+ * pil_cvp_mem:        0x87300000 0x500000
+ * pil_cdsp_mem:       0x87800000 0x140000
+ * pil_slpi_mem:       0x88c00000 0x2f0000
+ * pil_adsp_mem:       0x8bb00000 0x250000
+ * pil_spss_mem:       0x8e000000 0x100000
+ * cdsp_secure_heap:   0x8e100000 0x460000
+ * cdsp_sec_mem:       0x9f400000 0xc00000
+ * cont_splash_memory: 0x9c000000 0x023000
+ * disp_rdump_memory:  0xac000000 0x010000
+ * dfps_data_memory:   0x9e300000 0x010000
+ * ramoops:            0xB0000000 0x400000   (Gourami)
+ * alt_ramoops_mem:    0xB0400000 0x400000   (Gourami)
+ * ramoops_meta_mem:   0xB0800000 0x100000   (Gourami)
+ * kregistry_mem:      0xC01BE000 0x100000   (Gourami)
+*/
+
+&reserved_memory {
+	ramoops_mem: ramoops_region@B0000000 {
+		compatible = "removed-dma-pool";
+		no-map;
+		reg = <0 0xB0000000 0 0x400000>;
+	};
+
+	alt_ramoops_mem: alt_ramoops_region@B0400000 {
+		compatible = "removed-dma-pool";
+		no-map;
+		reg = <0 0xB0400000 0 0x400000>;
+	};
+
+	ramoops_meta_mem: ramoops_meta_region@0xB0800000 {
+		compatible = "removed-dma-pool";
+		no-map;
+		reg = <0 0xB0800000 0 0x1000>;
+	};
+
+	kregistry_mem: kregistry_mem@C01BE000 {
+		compatible = "removed-dma-pool";
+		no-map;
+		reg = <0 0xC01BE000 0 0x10000>;
+	};
+};
+
+&xbl_aop_mem {
+	reg = <0x0 0x80600000 0x0 0x260000>;
+};
+
+&pil_slpi_mem {
+	reg = <0x0 0x88c00000 0x0 0x2f00000>;
+};
+
+&pil_adsp_mem {
+	reg = <0x0 0x8bb00000 0x0 0x2500000>;
+};
+
+&pil_spss_mem {
+	reg = <0x0 0x8e000000 0x0 0x100000>;
+};
+
+&cdsp_secure_heap {
+	reg = <0x0 0x8e100000 0x0 0x4600000>;
+};
+
+&spss_utils {
+	qcom,pil-addr = <0x8e000000>;
+};
+
+&disp_rdump_memory {
+	reg = <0x0 0xac000000 0x0 0x01000000>;
+	no-map;
+};
