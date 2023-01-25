@@ -1439,6 +1439,24 @@ static inline u64 scale_exec_time(u64 delta, struct rq *rq)
 	return (delta * rq->task_exec_scale) >> 10;
 }
 
+u64 get_scale_exec_time(u64 delta, int cpu)
+{
+  return scale_exec_time(delta, cpu_rq(cpu));
+}
+
+void glk_update_util(struct rq *rq, unsigned int flags)
+{
+  struct update_util_data *data;
+
+  if (!(flags & SCHED_CPUFREQ_GLK))
+    return;
+
+  data = rcu_dereference_sched(*per_cpu_ptr(&cpufreq_update_util_data,
+                                            cpu_of(rq)));
+  if (data)
+    data->func(data, sched_ktime_clock(), flags);
+}
+
 /* Convert busy time to frequency equivalent
  * Assumes load is scaled to 1024
  */
