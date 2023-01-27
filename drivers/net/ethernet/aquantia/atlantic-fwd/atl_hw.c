@@ -180,8 +180,9 @@ int atl_hw_reset(struct atl_hw *hw)
 		tries++;
 		reg = atl_read(hw, ATL_MCP_SCRATCH(RBL_STS)) & 0xffff;
 
-		if (!reg || reg == 0xdead)
+		if (!reg || reg == 0xdead) {
 			continue;
+		}
 
 		/* if (reg != 0xf1a7) */
 			break;
