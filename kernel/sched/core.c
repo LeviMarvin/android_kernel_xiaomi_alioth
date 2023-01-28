@@ -732,6 +732,14 @@ static void set_load_weight(struct task_struct *p, bool update_load)
 	}
 }
 
+#if IS_ENABLED(CONFIG_PACKAGE_RUNTIME_INFO)
+void __weak migt_monitor_hook(int enqueue, int cpu,
+		struct task_struct *p, u64 walltime)
+{
+	/*do nothing*/
+}
+#endif
+
 #ifdef CONFIG_UCLAMP_TASK
 /*
  * Serializes updates of utilization clamp values

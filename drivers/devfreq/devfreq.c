@@ -637,6 +637,9 @@ struct devfreq *devfreq_add_device(struct device *dev,
 	devfreq->data = data;
 	devfreq->nb.notifier_call = devfreq_notifier_call;
 	devfreq->dev_suspended = false;
+#if IS_ENABLED(CONFIG_MIGT)
+	devfreq->flag = DF_NORMAL;
+#endif
 
 	if (!devfreq->profile->max_state && !devfreq->profile->freq_table) {
 		mutex_unlock(&devfreq->lock);
