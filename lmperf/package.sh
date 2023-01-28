@@ -9,8 +9,8 @@ cd ${PRODUCT_OUTDIR}
 rm -rf ./*
 
 echo "Copy files..."
-cd ${ANYKERNEL3_ROOTDIR}
-cp ${KERNEL_OUTDIR}/arch/arm64/boot/Image ./
+cp ${KERNEL_OUTDIR}/arch/arm64/boot/Image ./${ANYKERNEL3_ROOTDIR}/
+cp ${KERNEL_OUTDIR}/arch/arm64/boot/Image ./${PRODUCT_OUTDIR}/
 
 echo "Set permissions..."
 chmod +x Image
