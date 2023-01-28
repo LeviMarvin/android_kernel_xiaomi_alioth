@@ -1,20 +1,42 @@
+menuconfig MIHW
+	bool "Xiaomi kernel optimization driver code"
+	default n
+	select CAM_RECLAIM
+	select MI_FRAGMENTION
+	select PERF_HELPER
+	select RTMM
+	select SF_BINDER
+	select TASK_DELAY_ACCT
+	---help---
+	  Xiaomi MIUI optimization driver code
+
+if MIHW
+
+config MILLET
+	bool "Millet frozen framework"
+	depends on MIHW
+	help
+	  Xiaomi Millet frozen framework
+
 config MIGT
-	bool "boost cpufreq when load high"
+	bool "Mi Game Turbo"
 	depends on MIHW
 	help
 	  Boost cpufreq when current frame drawing time too long
 
-config MILLET
-	bool "frozen framework"
-	depends on MIHW
-	---help---
-	  Mi frozen function
-
 config MIGT_ENERGY_MODEL
-	bool "DT-based Energy Model for CPU and gpu"
-	depends on MIHW
+	bool "Mi Game Turbo DT-based Energy Model for CPU and gpu"
+	depends on MIHW && MIGT
 	help
 	  This mod rely on Energy Models (EMs) statically defined in
 	  the Device Tree. Since EAS now uses only the active costs of CPUs,
 	  the cluster-related costs and idle-costs are ignored.
 
+config PACKAGE_RUNTIME_INFO
+	bool "stat:package runtime info on cluster"
+    depends on MIHW
+	default y if MIHW
+	help
+	  This option can show package runtime info in sup/big/little core.
+
+endif # MIHW

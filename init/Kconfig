@@ -98,28 +98,6 @@ config LOCALVERSION
 	  object and source tree, in that order.  Your total string can
 	  be a maximum of 64 characters.
 
-config MIHW
-	bool "Xiaomi kernel optimization"
-	default n
-	select CAM_RECLAIM
-	select MI_FRAGMENTION
-	select MIGT
-	select MILLET
-	select MIGT_ENERGY_MODEL
-	select PACKAGE_RUNTIME_INFO
-	select PERF_HELPER
-	select RTMM
-	select SF_BINDER
-	select TASK_DELAY_ACCT
-	help
-	  Enables XiaoMi MIUI user experience optimization driver code
-
-config PACKAGE_RUNTIME_INFO
-	bool "stat:package runtime info on cluster"
-	default y if MIHW
-	help
-	  This option can show package runtime info in sup/big/little core.
-
 config LOCALVERSION_AUTO
 	bool "Automatically append version information to the version string"
 	default y
