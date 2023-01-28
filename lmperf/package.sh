@@ -5,8 +5,7 @@ export ANYKERNEL3_ROOTDIR=${KERNEL_ROOTDIR}/lmperf/AnyKernel3
 PRODUCT_OUTDIR=${KERNEL_ROOTDIR}/lmperf/out
 
 echo "Clean the output dir..."
-cd ${PRODUCT_OUTDIR}
-rm -rf ./*
+rm -rf ${PRODUCT_OUTDIR}/*
 
 echo "Copy files..."
 cp ${KERNEL_OUTDIR}/arch/arm64/boot/Image ${ANYKERNEL3_ROOTDIR}/
