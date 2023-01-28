@@ -141,3 +141,7 @@ kernel/configs/android-*.cfg
 
 # Output directory
 out/
+lmperf/out/
+
+# lmperf
+lmperf/AnyKernel3/
