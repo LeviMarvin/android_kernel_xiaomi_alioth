@@ -9,10 +9,11 @@ cd ${PRODUCT_OUTDIR}
 rm -rf ./*
 
 echo "Copy files..."
-cp ${KERNEL_OUTDIR}/arch/arm64/boot/Image ./${ANYKERNEL3_ROOTDIR}/
-cp ${KERNEL_OUTDIR}/arch/arm64/boot/Image ./${PRODUCT_OUTDIR}/
+cp ${KERNEL_OUTDIR}/arch/arm64/boot/Image ${ANYKERNEL3_ROOTDIR}/
+cp ${KERNEL_OUTDIR}/arch/arm64/boot/Image ${PRODUCT_OUTDIR}/
 
 echo "Set permissions..."
+cd ${ANYKERNEL3_ROOTDIR}/
 chmod +x Image
 
 echo "Compress..."
