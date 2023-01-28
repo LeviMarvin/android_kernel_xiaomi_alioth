@@ -10,8 +10,8 @@ make mrproper
 git restore drivers/*
 }
 
-make ${target} O=${KERNEL_OUTDIR}
-make menuconfig O=${KERNEL_OUTDIR}
-make savedefconfig O=${KERNEL_OUTDIR}
+make ${target} O=${KERNEL_OUTDIR} ARCH=${ARCH} SUBARCH=arm64 CC=clang LD=ld.lld
+make menuconfig O=${KERNEL_OUTDIR} ARCH=${ARCH} SUBARCH=arm64 CC=clang LD=ld.lld
+make savedefconfig O=${KERNEL_OUTDIR} ARCH=${ARCH} SUBARCH=arm64 CC=clang LD=ld.lld
 mv ${KERNEL_OUTDIR}/defconfig arch/${ARCH}/configs/${target}
 clean
