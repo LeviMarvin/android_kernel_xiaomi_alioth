@@ -2,7 +2,7 @@
 
 ## Source code mirrors
 Because of CGF (China's Greate Firewall),
-the latest code of this kernel has been moved to **Gitea** now.
+the latest code of this kernel has been moved to **Codeberg** now.
 
 Please visit Codeberg page for getting the latest download and changes.
 
