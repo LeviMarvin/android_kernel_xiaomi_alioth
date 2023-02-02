@@ -3,13 +3,14 @@
 ## Source code mirrors
 Because of CGF (China's Greate Firewall),
 the latest code of this kernel has been moved to **Codeberg** now.
+But all of mirrors will auto sync from the repo at Codeberg.
 
 Please visit Codeberg page for getting the latest download and changes.
 
 - **[Codeberg](https://gitea.com/LeviMarvin/kernel_xiaomi_alioth)**
 - [Github](https://github.com/LeviMarvin/kernel_xiaomi_alioth)
 - [Gitea](https://gitea.com/LeviMarvin/kernel_xiaomi_alioth)
-- [Gitlab](https://gitlab.com/lmperf/kernel_alioth)
+- [Gitlab](https://gitlab.com/lmperf/kernel/alioth)
 
 ## Feature
 - Linux Upstream: `4.19.271`/`4.19.y`
