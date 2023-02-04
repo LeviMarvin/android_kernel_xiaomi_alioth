@@ -1,7 +1,7 @@
 # Linux 4.19 kernel for Redmi K40 (alioth/in)
 
 ## Source code mirrors
-Because of CGF (China's Greate Firewall),
+Because of CGF (China's Great Firewall),
 the latest code of this kernel has been moved to **Codeberg** now.
 But all of mirrors will auto sync from the repo at Codeberg.
 
@@ -13,11 +13,11 @@ Please visit Codeberg page for getting the latest download and changes.
 - [Gitlab](https://gitlab.com/lmperf/kernel/alioth)
 
 ## Feature
-- Linux Upstream: `4.19.271`/`4.19.y`
-- ACK code branch: `4.19.271`/`android-4.19-stable`
-    - Extra: `android-4.19-trusty`
+- Linux Upstream: `4.19.y`/`4.19.271`
+- ACK code branch: `android-4.19-stable`/`4.19.271`
+    - Extra: `android-trusty-4.19`
 - CLO code tag: `LA.UM.9.12.r1-15100-SMxx50.QSSI13.0`
-- KernelSU version: **15**
+- KernelSU date: **20230204**
 - Xiaomi driver:
     - `MILLET`
     - `RTMM`
