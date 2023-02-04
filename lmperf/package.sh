@@ -10,6 +10,7 @@ rm -rf ${PRODUCT_OUTDIR}/*
 echo "Copy files..."
 cp ${KERNEL_OUTDIR}/arch/arm64/boot/Image ${ANYKERNEL3_ROOTDIR}/
 cp ${KERNEL_OUTDIR}/arch/arm64/boot/Image ${PRODUCT_OUTDIR}/
+cp ${KERNEL_OUTDIR}/arch/arm64/boot/dtbo.img ${PRODUCT_OUTDIR}/
 
 echo "Set permissions..."
 cd ${ANYKERNEL3_ROOTDIR}/
