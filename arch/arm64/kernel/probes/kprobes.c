@@ -35,6 +35,7 @@
 #include <linux/uaccess.h>
 #include <asm/irq.h>
 #include <asm/sections.h>
+#include <asm/daifflags.h>
 
 #include "decode-insn.h"
 
