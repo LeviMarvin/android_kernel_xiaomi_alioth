@@ -529,8 +529,8 @@ this file is for attribution only of alioth
 	qcom,chg-term-current-ma = <(-220)>;
 	//qcom,step-charging-enable;
 	qcom,sw-jeita-enable;
-	qcom,chg-warm-th= <430>;
-	qcom,chg-cool-th= <200>;
+	qcom,chg-warm-th= <480>;
+	qcom,chg-cool-th= <150>;
 	//qcom,suspend-input-on-debug-batt;
 	qcom,usbpd-phandle = <&pm8150b_pdphy>;
 	qcom,battery-data = <&alioth_batterydata>;
@@ -683,6 +683,7 @@ this file is for attribution only of alioth
 		qcom,batt-id-range-pct = <15>;
 		#include "fg-gen4-batterydata-alioth-FMT-4520mah.dtsi"
 		#include "fg-gen4-batterydata-alioth-GY-4520mah.dtsi"
+        #include "fg-gen4-batterydata-alioth-sun-5000mah.dtsi"
 	};
 
 	onewire_gpio: onewire_gpio {
