@@ -197,15 +197,11 @@ static int call_step_hook(struct pt_regs *regs, unsigned int esr)
 	struct step_hook *hook;
 	int retval = DBG_HOOK_ERROR;
 
-	rcu_read_lock();
-
 	list_for_each_entry_rcu(hook, &step_hook, node)	{
 		retval = hook->fn(regs, esr);
 		if (retval == DBG_HOOK_HANDLED)
 			break;
 	}
-
-	rcu_read_unlock();
 
 	return retval;
 }
@@ -301,11 +297,13 @@ static int call_break_hook(struct pt_regs *regs, unsigned int esr)
 	struct break_hook *hook;
 	int (*fn)(struct pt_regs *regs, unsigned int esr) = NULL;
 
-	rcu_read_lock();
+	/*
+	 * Since brk exception disables interrupt, this function is
+	 * entirely not preemptible, and we can use rcu list safely here.
+	 */
 	list_for_each_entry_rcu(hook, &break_hook, node)
 		if ((esr & hook->esr_mask) == hook->esr_val)
 			fn = hook->fn;
-	rcu_read_unlock();
 
 	return fn ? fn(regs, esr) : DBG_HOOK_ERROR;
 }
