@@ -1,6 +1,6 @@
 config KSU
 	tristate "KernelSU module"
-	default n
+	default y
 	depends on KPROBES
 	depends on OVERLAY_FS
 	help
