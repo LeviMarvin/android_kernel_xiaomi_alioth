@@ -19,11 +19,13 @@ Please visit Codeberg page for getting the latest download and changes.
 - CLO code tag: `LA.UM.9.12.r1-15100-SMxx50.QSSI13.0`
 - KernelSU date: **20230205**
 - Xiaomi driver:
-    - `MILLET`
+    - Millet
     - `RTMM`
     - `FRAGMENTION`
     - `CAM_RECLAIM`
     - `RPI`
+- CPU Freq: Ondemand
+- Supported: `devfreq`, `kprofile`
 
 ## Problem
 - None for now.
