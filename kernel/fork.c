@@ -95,9 +95,8 @@
 #include <linux/thread_info.h>
 #include <linux/cpufreq_times.h>
 #include <linux/scs.h>
-#if IS_ENABLED(CONFIG_MIHW)
 #include <linux/cpuset.h>
-#endif
+#include <linux/devfreq_boost.h>
 
 #include <asm/pgtable.h>
 #include <asm/pgalloc.h>
