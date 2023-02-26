@@ -24,7 +24,7 @@ Please visit Codeberg page for getting the latest download and changes.
     - `FRAGMENTION`
     - `CAM_RECLAIM`
     - `RPI`
-- CPU Freq: Ondemand
+- CPU Freq: `schedutil`
 - Supported: `devfreq`, `kprofile`
 
 ## Problem
@@ -32,7 +32,7 @@ Please visit Codeberg page for getting the latest download and changes.
 
 ## Install
 ### In Recovery
-**Beforce start, TWRP and the Recovery based on it are recommended.**
+**Beforce start, TWRP or the Recovery based on it are recommended.**
 
 Do not flash dtbo.img file if you are using MIUI.
 
@@ -49,3 +49,4 @@ and download `Image` file from the latest release.
 3. Copy and replace `Image` file to unpacked `boot.img` directory.
 4. Repack the `boot.img` file with this kernel `Image` file.
 5. Reboot into Bootloader mode, flash boot.img to the boot partition of your phone.
+
