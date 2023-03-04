@@ -16,7 +16,7 @@ Please visit Codeberg page for getting the latest download and changes.
 - Linux Upstream: `4.19.y`/`4.19.275`
 - ACK code branch: `android-4.19-stable`/`4.19.275`
     - Extra: `android-trusty-4.19`
-- CLO code tag: `LA.UM.9.12.r1-15100-SMxx50.QSSI13.0`
+- CLO code tag: `LA.UM.9.12.r1-15200-SMxx50.QSSI13.0`
 - KernelSU version: **(16)** (Supported Manager: `v0.4.0-5-g76b9790`)
 - Xiaomi driver:
     - Millet
