@@ -771,7 +771,7 @@ do_sku:
 			alc_setup_gpio(codec, 0x02);
 			break;
 		case 7:
-			alc_setup_gpio(codec, 0x04);
+			alc_setup_gpio(codec, 0x03);
 			break;
 		case 5:
 		default:

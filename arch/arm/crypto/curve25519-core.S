@@ -10,8 +10,8 @@
 #include <linux/linkage.h>
 
 .text
-.arch armv7-a
 .fpu neon
+.arch armv7-a
 .align 4
 
 ENTRY(curve25519_neon)

@@ -783,13 +783,7 @@ static int __init sunxi_rsb_init(void)
 		return ret;
 	}
 
-	ret = platform_driver_register(&sunxi_rsb_driver);
-	if (ret) {
-		bus_unregister(&sunxi_rsb_bus);
-		return ret;
-	}
-
-	return 0;
+	return platform_driver_register(&sunxi_rsb_driver);
 }
 module_init(sunxi_rsb_init);
 

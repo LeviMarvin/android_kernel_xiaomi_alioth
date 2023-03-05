@@ -831,10 +831,8 @@ static int ioctl_send_response(struct client *client, union ioctl_arg *arg)
 
 	r = container_of(resource, struct inbound_transaction_resource,
 			 resource);
-	if (is_fcp_request(r->request)) {
-		kfree(r->data);
+	if (is_fcp_request(r->request))
 		goto out;
-	}
 
 	if (a->length != fw_get_response_length(r->request)) {
 		ret = -EINVAL;

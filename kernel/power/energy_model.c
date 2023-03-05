@@ -81,7 +81,7 @@ static void em_debug_create_pd(struct em_perf_domain *pd, int cpu) {}
 static struct em_perf_domain *em_create_pd(cpumask_t *span, int nr_states,
 						struct em_data_callback *cb)
 {
-	unsigned long opp_eff, prev_opp_eff, prev_cost = ULONG_MAX;
+	unsigned long opp_eff, prev_opp_eff = ULONG_MAX;
 	unsigned long power, freq, prev_freq = 0;
 	int i, ret, cpu = cpumask_first(span);
 	struct em_cap_state *table;
@@ -148,19 +148,12 @@ static struct em_perf_domain *em_create_pd(cpumask_t *span, int nr_states,
 
 	/* Compute the cost of each capacity_state. */
 	fmax = (u64) table[nr_states - 1].frequency;
-	for (i = nr_states - 1; i >= 0; i--) {
-		unsigned long power_res = em_scale_power(table[i].power);
-
-		table[i].cost = div64_u64(fmax * power_res,
+	for (i = 0; i < nr_states; i++) {
+		table[i].cost = div64_u64(fmax * table[i].power,
 					  table[i].frequency);
 		if (i > 0 && (table[i].cost < table[i - 1].cost) &&
 				(table[i].power > table[i - 1].power)) {
 			table[i].cost = table[i - 1].cost;
-		} else if (table[i].cost >= prev_cost) {
-			pr_warn("pd%d: EM: OPP:%lu is inefficient\n",
-				cpu, table[i].frequency);
-		} else {
-			prev_cost = table[i].cost;
 		}
 	}
 
