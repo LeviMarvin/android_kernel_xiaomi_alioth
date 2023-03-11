@@ -1,4 +1,5 @@
 #!/bin/bash
+
 export ARCH=arm64
 export KERNEL_ROOTDIR=`pwd`
 export KERNEL_OUTDIR=${KERNEL_ROOTDIR}/out
@@ -10,7 +11,7 @@ make mrproper
 git restore drivers/*
 }
 
-make ${target} O=${KERNEL_OUTDIR} ARCH=${ARCH} SUBARCH=arm64 CC=clang LD=ld.lld
-make savedefconfig O=${KERNEL_OUTDIR} ARCH=${ARCH} SUBARCH=arm64 CC=clang LD=ld.lld
+make ${target} LLVM=1 LLVM_IAS=1 O=${KERNEL_OUTDIR} ARCH=${ARCH} SUBARCH=arm64 CC=clang LD=ld.lld
+make savedefconfig LLVM=1 LLVM_IAS=1 O=${KERNEL_OUTDIR} ARCH=${ARCH} SUBARCH=arm64 CC=clang LD=ld.lld
 mv ${KERNEL_OUTDIR}/defconfig arch/${ARCH}/configs/${target}
 clean
