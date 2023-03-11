@@ -17,6 +17,8 @@
 
 	.arch		armv8-a+crypto
 
+    vctr		.req	v16
+
 	/* preload all round keys */
 	.macro		load_round_keys, rounds, rk
 	cmp		\rounds, #12

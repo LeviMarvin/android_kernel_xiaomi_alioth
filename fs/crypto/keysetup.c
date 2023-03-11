@@ -51,7 +51,6 @@ struct fscrypt_mode fscrypt_modes[] = {
 		.friendly_name = "AES-256-HCTR2",
 		.cipher_str = "hctr2(aes)",
 		.keysize = 32,
-		.security_strength = 32,
 		.ivsize = 32,
 	},
 	[FSCRYPT_MODE_PRIVATE] = {
