@@ -269,7 +269,7 @@
  *
  * void clmul_polyval_mul(u8 *op1, const u8 *op2);
  */
-SYM_FUNC_START(clmul_polyval_mul)
+ENTRY(clmul_polyval_mul)
 	FRAME_BEGIN
 	vmovdqa .Lgstar(%rip), GSTAR
 	movups (%rdi), %xmm0
@@ -280,7 +280,7 @@ SYM_FUNC_START(clmul_polyval_mul)
 	movups SUM, (%rdi)
 	FRAME_END
 	RET
-SYM_FUNC_END(clmul_polyval_mul)
+ENDPROC(clmul_polyval_mul)
 
 /*
  * Perform polynomial evaluation as specified by POLYVAL.  This computes:
@@ -295,7 +295,7 @@ SYM_FUNC_END(clmul_polyval_mul)
  * void clmul_polyval_update(const struct polyval_tfm_ctx *keys,
  *	const u8 *in, size_t nblocks, u8 *accumulator);
  */
-SYM_FUNC_START(clmul_polyval_update)
+ENTRY(clmul_polyval_update)
 	FRAME_BEGIN
 	vmovdqa .Lgstar(%rip), GSTAR
 	movups (ACCUMULATOR), SUM
@@ -318,4 +318,4 @@ SYM_FUNC_START(clmul_polyval_update)
 	movups SUM, (ACCUMULATOR)
 	FRAME_END
 	RET
-SYM_FUNC_END(clmul_polyval_update)
+ENDPROC(clmul_polyval_update)
