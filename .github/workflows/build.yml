@@ -1,0 +1,41 @@
+name: Build kernel
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare host environment
+        run: |
+            sudo apt update -y
+            sudo apt install -y bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32readline-dev lib32z1-dev liblz4-tool libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 libncurses6 libncursesw6 lib32ncurses-dev lib32ncurses6 lib32ncursesw6 libncurses5-dev lib32ncurses-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig make python2
+            sudo apt install -y neofetch
+
+      - uses: actions/checkout@v3
+      - name: Echo host details
+        run: |
+            neofetch
+
+      - name: Prepare toolchains
+        run: |
+          mkdir clang && wget https://github.com/XSans0/WeebX-Clang/releases/download/WeebX-Clang-17.0.0-release/WeebX-Clang-17.0.0.tar.gz && tar -C clang/ -zxvf *.tar.gz
+
+      - name: Pull the kernel source
+        run: |
+          git clone --depth=1 https://github.com/LeviMarvin/kernel_xiaomi_alioth -b talon kernel-source
+
+      - name: Build
+        run: |
+          export PATH=$GITHUB_WORKSPACE/clang/bin:${PATH}
+          cd kernel-source
+          make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 SUBARCH=arm64 CC=clang LD=ld.lld alioth_lmperf_defconfig
+          cd out/
+          make -j$(nproc) LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 SUBARCH=arm64 CC=clang LD=ld.lld CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: $(date "+%Y.%m.%d")
+          path: $GITHUB_WORKSPACE/kernel-source/out/arch/arm64/boot/Image
