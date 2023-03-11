@@ -3413,6 +3413,12 @@ static const struct alg_test_desc alg_test_descs[] = {
 		.suite = {
 			.hash = __VECS(poly1305_tv_template)
 		}
+    }, {
+        .alg = "polyval",
+        .test = alg_test_hash,
+        .suite = {
+        .hash = __VECS(polyval_tv_template)
+        }
 	}, {
 		.alg = "rfc3686(ctr(aes))",
 		.test = alg_test_skcipher,
