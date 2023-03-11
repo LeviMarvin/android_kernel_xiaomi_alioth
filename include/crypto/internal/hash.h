@@ -114,6 +114,12 @@ static inline void crypto_drop_shash(struct crypto_shash_spawn *spawn)
 	crypto_drop_spawn(&spawn->base);
 }
 
+static inline struct shash_alg *crypto_spawn_shash_alg(
+    struct crypto_shash_spawn *spawn)
+{
+  return __crypto_shash_alg(spawn->base.alg);
+}
+
 struct shash_alg *shash_attr_alg(struct rtattr *rta, u32 type, u32 mask);
 
 int shash_ahash_update(struct ahash_request *req, struct shash_desc *desc);
