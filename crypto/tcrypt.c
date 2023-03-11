@@ -2298,6 +2298,11 @@ static int do_test(const char *alg, u32 type, u32 mask, int m, u32 num_mb)
 				  0, speed_template_32);
 		break;
 
+	case 226:
+		test_cipher_speed("hctr2(aes)", ENCRYPT, sec, NULL,
+				  0, speed_template_32);
+		break;
+
 	case 300:
 		if (alg) {
 			test_hash_speed(alg, sec, generic_hash_speed_template);
