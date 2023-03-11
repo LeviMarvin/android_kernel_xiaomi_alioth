@@ -191,7 +191,7 @@ int handle_sepolicy(unsigned long arg3, void __user *arg4)
 
 	if (!getenforce()) {
 		pr_info("SELinux permissive or disabled, don't apply policies.");
-		return -1;
+		return 0;
 	}
 
 	struct sepol_data data;
@@ -451,7 +451,7 @@ int handle_sepolicy(unsigned long arg3, void __user *arg4)
 		}
 		ret = 0;
 	} else {
-		pr_err("sepol: unknown cmd: %d");
+		pr_err("sepol: unknown cmd: %d\n", cmd);
 	}
 
 exit:
