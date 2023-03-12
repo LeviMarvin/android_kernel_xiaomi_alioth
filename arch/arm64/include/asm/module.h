@@ -16,7 +16,10 @@
 #ifndef __ASM_MODULE_H
 #define __ASM_MODULE_H
 
+#include <asm-generic/int-ll64.h>
 #include <asm-generic/module.h>
+
+#include <linux/elf.h>
 
 #define MODULE_ARCH_VERMAGIC	"aarch64"
 

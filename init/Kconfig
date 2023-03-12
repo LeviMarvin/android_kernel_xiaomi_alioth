@@ -2207,6 +2207,35 @@ config UNUSED_KSYMS_WHITELIST
 	  one per line. The path can be absolute, or relative to the kernel
 	  source tree.
 
+menuconfig LMPERF_MODULES_OPTIONS
+	bool "Kernel module options of lmperf kernel"
+	depends on MODULES
+	default n
+	---help---
+	Kernel module options of lmperf kernel
+
+if LMPERF_MODULES_OPTIONS
+
+config LMPERF_MODULES_CUSTOM_VERMAGIC
+	bool "Enbale custom kernel vermagic"
+	depends on MODULES && !MODVERSIONS
+	default n
+	help
+	  Sometime, the kernel will be updater than the kernel from OEM's system
+	  so that OEM's kernel modules will not be loaded by the kernel.
+	  
+	  Enable this option and input your custom vermagic to allow the kernel
+	  loads OEM's kernel modules with custom vermagic string.
+
+config LMPERF_MODULES_CUSTOM_VERMAGIC_STRING
+	string "Kernel vermagic information"
+	depends on MODULES && LMPERF_MODULES_CUSTOM_VERMAGIC
+	default " "
+	help
+	  Custom vermagic string
+
+endif # LMPERF_MODULES_OPTIONS
+
 endif # MODULES
 
 config MODULES_TREE_LOOKUP
