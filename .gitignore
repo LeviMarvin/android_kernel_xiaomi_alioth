@@ -140,9 +140,6 @@ kernel/configs/android-*.cfg
 # Tech package directories
 #techpack/
 
-# KernelSU
-KernelSU/
-
 # Output directory
 out/
 lmperf/out/
