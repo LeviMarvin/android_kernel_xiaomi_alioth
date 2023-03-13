@@ -127,6 +127,28 @@ struct crypto_larval *crypto_larval_alloc(const char *name, u32 type, u32 mask)
 }
 EXPORT_SYMBOL_GPL(crypto_larval_alloc);
 
+struct crypto_larval_v2 *crypto_larval_alloc_v2(const char *name, u32 type, u32 mask)
+{
+	struct crypto_larval_v2 *larval;
+	
+	larval = kzalloc(sizeof(*larval), GFP_KERNEL);
+
+	if (!larval)
+		return ERR_PTR(-ENOMEM);
+
+	larval->mask = mask;
+	larval->alg.cra_flags = CRYPTO_ALG_LARVAL | type;
+	larval->alg.cra_priority = -1;
+	larval->alg.cra_destroy = crypto_larval_destroy;
+
+	strscpy(larval->alg.cra_name, name, CRYPTO_MAX_ALG_NAME);
+
+	init_completion(&larval->completion);
+
+	return larval;
+}
+EXPORT_SYMBOL_GPL(crypto_larval_alloc_v2);
+
 static struct crypto_alg *crypto_larval_add(const char *name, u32 type,
 					    u32 mask)
 {
@@ -349,12 +371,13 @@ static unsigned int crypto_ctxsize(struct crypto_alg *alg, u32 type, u32 mask)
 	return len;
 }
 
-static void crypto_shoot_alg(struct crypto_alg *alg)
+void crypto_shoot_alg(struct crypto_alg *alg)
 {
 	down_write(&crypto_alg_sem);
 	alg->cra_flags |= CRYPTO_ALG_DYING;
 	up_write(&crypto_alg_sem);
 }
+EXPORT_SYMBOL_GPL(crypto_shoot_alg);
 
 struct crypto_tfm *__crypto_alloc_tfm(struct crypto_alg *alg, u32 type,
 				      u32 mask)

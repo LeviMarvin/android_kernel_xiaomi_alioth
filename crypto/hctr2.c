@@ -35,9 +35,9 @@
 #define TWEAK_SIZE		32
 
 struct hctr2_instance_ctx {
-	struct crypto_cipher_spawn blockcipher_spawn;
-	struct crypto_skcipher_spawn xctr_spawn;
-	struct crypto_shash_spawn polyval_spawn;
+	struct crypto_cipher_spawn_v2 blockcipher_spawn;
+	struct crypto_skcipher_spawn_v2 xctr_spawn;
+	struct crypto_shash_spawn_v2 polyval_spawn;
 };
 
 struct hctr2_tfm_ctx {
@@ -334,8 +334,8 @@ static int hctr2_decrypt(struct skcipher_request *req)
 
 static int hctr2_init_tfm(struct crypto_skcipher *tfm)
 {
-	struct skcipher_instance *inst = skcipher_alg_instance(tfm);
-	struct hctr2_instance_ctx *ictx = skcipher_instance_ctx(inst);
+	struct skcipher_instance_v2 *inst = skcipher_alg_instance_v2(tfm);
+	struct hctr2_instance_ctx *ictx = skcipher_instance_ctx_v2(inst);
 	struct hctr2_tfm_ctx *tctx = crypto_skcipher_ctx(tfm);
 	struct crypto_skcipher *xctr;
 	struct crypto_cipher *blockcipher;
@@ -343,17 +343,17 @@ static int hctr2_init_tfm(struct crypto_skcipher *tfm)
 	unsigned int subreq_size;
 	int err;
 
-	xctr = crypto_spawn_skcipher(&ictx->xctr_spawn);
+	xctr = crypto_spawn_skcipher_v2(&ictx->xctr_spawn);
 	if (IS_ERR(xctr))
 		return PTR_ERR(xctr);
 
-	blockcipher = crypto_spawn_cipher(&ictx->blockcipher_spawn);
+	blockcipher = crypto_spawn_cipher_v2(&ictx->blockcipher_spawn);
 	if (IS_ERR(blockcipher)) {
 		err = PTR_ERR(blockcipher);
 		goto err_free_xctr;
 	}
 
-	polyval = crypto_spawn_shash(&ictx->polyval_spawn);
+	polyval = crypto_spawn_shash_v2(&ictx->polyval_spawn);
 	if (IS_ERR(polyval)) {
 		err = PTR_ERR(polyval);
 		goto err_free_blockcipher;
@@ -392,13 +392,13 @@ static void hctr2_exit_tfm(struct crypto_skcipher *tfm)
 	crypto_free_shash(tctx->polyval);
 }
 
-static void hctr2_free_instance(struct skcipher_instance *inst)
+static void hctr2_free_instance(struct skcipher_instance_v2 *inst)
 {
-	struct hctr2_instance_ctx *ictx = skcipher_instance_ctx(inst);
+	struct hctr2_instance_ctx *ictx = skcipher_instance_ctx_v2(inst);
 
-	crypto_drop_cipher(&ictx->blockcipher_spawn);
-	crypto_drop_skcipher(&ictx->xctr_spawn);
-	crypto_drop_shash(&ictx->polyval_spawn);
+	crypto_drop_cipher_v2(&ictx->blockcipher_spawn);
+	crypto_drop_skcipher_v2(&ictx->xctr_spawn);
+	crypto_drop_shash_v2(&ictx->polyval_spawn);
 	kfree(inst);
 }
 
@@ -408,7 +408,7 @@ static int hctr2_create_common(struct crypto_template *tmpl,
 			       const char *polyval_name)
 {
 	u32 mask;
-	struct skcipher_instance *inst;
+	struct skcipher_instance_v2 *inst;
 	struct hctr2_instance_ctx *ictx;
 	struct skcipher_alg *xctr_alg;
 	struct crypto_alg *blockcipher_alg;
@@ -417,22 +417,22 @@ static int hctr2_create_common(struct crypto_template *tmpl,
 	int len;
 	int err;
 
-	err = crypto_check_attr_type(tb, CRYPTO_ALG_TYPE_SKCIPHER, &mask);
+	err = crypto_check_attr_type_v2(tb, CRYPTO_ALG_TYPE_SKCIPHER, &mask);
 	if (err)
 		return err;
 
 	inst = kzalloc(sizeof(*inst) + sizeof(*ictx), GFP_KERNEL);
 	if (!inst)
 		return -ENOMEM;
-	ictx = skcipher_instance_ctx(inst);
+	ictx = skcipher_instance_ctx_v2(inst);
 
 	/* Stream cipher, xctr(block_cipher) */
-	err = crypto_grab_skcipher(&ictx->xctr_spawn,
-				   skcipher_crypto_instance(inst),
+	err = crypto_grab_skcipher_v2(&ictx->xctr_spawn,
+				   skcipher_crypto_instance_v2(inst),
 				   xctr_name, 0, mask);
 	if (err)
 		goto err_free_inst;
-	xctr_alg = crypto_spawn_skcipher_alg(&ictx->xctr_spawn);
+	xctr_alg = crypto_spawn_skcipher_alg_v2(&ictx->xctr_spawn);
 
 	err = -EINVAL;
 	if (strncmp(xctr_alg->base.cra_name, "xctr(", 5))
@@ -447,11 +447,11 @@ static int hctr2_create_common(struct crypto_template *tmpl,
 
 	/* Block cipher, e.g. "aes" */
 	err = crypto_grab_cipher(&ictx->blockcipher_spawn,
-				 skcipher_crypto_instance(inst),
+				 skcipher_crypto_instance_v2(inst),
 				 blockcipher_name, 0, mask);
 	if (err)
 		goto err_free_inst;
-	blockcipher_alg = crypto_spawn_cipher_alg(&ictx->blockcipher_spawn);
+	blockcipher_alg = crypto_spawn_cipher_alg_v2(&ictx->blockcipher_spawn);
 
 	/* Require blocksize of 16 bytes */
 	err = -EINVAL;
@@ -459,12 +459,12 @@ static int hctr2_create_common(struct crypto_template *tmpl,
 		goto err_free_inst;
 
 	/* Polyval ε-∆U hash function */
-	err = crypto_grab_shash(&ictx->polyval_spawn,
-				skcipher_crypto_instance(inst),
+	err = crypto_grab_shash_v2(&ictx->polyval_spawn,
+				skcipher_crypto_instance_v2(inst),
 				polyval_name, 0, mask);
 	if (err)
 		goto err_free_inst;
-	polyval_alg = crypto_spawn_shash_alg(&ictx->polyval_spawn);
+	polyval_alg = crypto_spawn_shash_alg_v2(&ictx->polyval_spawn);
 
 	/* Ensure Polyval is being used */
 	err = -EINVAL;
@@ -507,7 +507,7 @@ static int hctr2_create_common(struct crypto_template *tmpl,
 
 	inst->free = hctr2_free_instance;
 
-	err = skcipher_register_instance(tmpl, inst);
+	err = skcipher_register_instance_v2(tmpl, inst);
 	if (err) {
 err_free_inst:
 		hctr2_free_instance(inst);

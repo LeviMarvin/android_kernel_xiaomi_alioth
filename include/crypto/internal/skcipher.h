@@ -18,6 +18,8 @@
 #include <linux/list.h>
 #include <linux/types.h>
 
+#include "crypto/internal/cipher.h"
+
 struct aead_request;
 struct rtattr;
 
@@ -32,8 +34,23 @@ struct skcipher_instance {
 	};
 };
 
+struct skcipher_instance_v2 {
+	void (*free)(struct skcipher_instance_v2 *inst);
+	union {
+		struct {
+			char head[offsetof(struct skcipher_alg, base)];
+			struct crypto_instance_v2 base;
+		} s;
+		struct skcipher_alg alg;
+	};
+};
+
 struct crypto_skcipher_spawn {
 	struct crypto_spawn base;
+};
+
+struct crypto_skcipher_spawn_v2 {
+	struct crypto_spawn_v2 base;
 };
 
 struct skcipher_walk {
@@ -78,6 +95,12 @@ static inline struct crypto_instance *skcipher_crypto_instance(
 	return &inst->s.base;
 }
 
+static inline struct crypto_instance_v2 *skcipher_crypto_instance_v2(
+	struct skcipher_instance_v2 *inst)
+{
+	return &inst->s.base;
+}
+
 static inline struct skcipher_instance *skcipher_alg_instance(
 	struct crypto_skcipher *skcipher)
 {
@@ -85,9 +108,22 @@ static inline struct skcipher_instance *skcipher_alg_instance(
 			    struct skcipher_instance, alg);
 }
 
+static inline struct skcipher_instance_v2 *skcipher_alg_instance_v2(
+	struct crypto_skcipher *skcipher)
+{
+	return container_of(crypto_skcipher_alg(skcipher),
+			    struct skcipher_instance_v2, alg);
+}
+
+
 static inline void *skcipher_instance_ctx(struct skcipher_instance *inst)
 {
 	return crypto_instance_ctx(skcipher_crypto_instance(inst));
+}
+
+static inline void *skcipher_instance_ctx_v2(struct skcipher_instance_v2 *inst)
+{
+	return crypto_instance_ctx_v2(skcipher_crypto_instance_v2(inst));
 }
 
 static inline void skcipher_request_complete(struct skcipher_request *req, int err)
@@ -104,13 +140,28 @@ static inline void crypto_set_skcipher_spawn(
 int crypto_grab_skcipher(struct crypto_skcipher_spawn *spawn, const char *name,
 			 u32 type, u32 mask);
 
+int crypto_grab_skcipher_v2(struct crypto_skcipher_spawn_v2 *spawn,
+			 struct crypto_instance_v2 *inst,
+			 const char *name, u32 type, u32 mask);
+
 static inline void crypto_drop_skcipher(struct crypto_skcipher_spawn *spawn)
 {
 	crypto_drop_spawn(&spawn->base);
 }
 
+static inline void crypto_drop_skcipher_v2(struct crypto_skcipher_spawn_v2 *spawn)
+{
+	crypto_drop_spawn_v2(&spawn->base);
+}
+
 static inline struct skcipher_alg *crypto_skcipher_spawn_alg(
 	struct crypto_skcipher_spawn *spawn)
+{
+	return container_of(spawn->base.alg, struct skcipher_alg, base);
+}
+
+static inline struct skcipher_alg *crypto_skcipher_spawn_alg_v2(
+	struct crypto_skcipher_spawn_v2 *spawn)
 {
 	return container_of(spawn->base.alg, struct skcipher_alg, base);
 }
@@ -121,10 +172,22 @@ static inline struct skcipher_alg *crypto_spawn_skcipher_alg(
 	return crypto_skcipher_spawn_alg(spawn);
 }
 
+static inline struct skcipher_alg *crypto_spawn_skcipher_alg_v2(
+	struct crypto_skcipher_spawn_v2 *spawn)
+{
+	return crypto_skcipher_spawn_alg_v2(spawn);
+}
+
 static inline struct crypto_skcipher *crypto_spawn_skcipher(
 	struct crypto_skcipher_spawn *spawn)
 {
 	return crypto_spawn_tfm2(&spawn->base);
+}
+
+static inline struct crypto_skcipher *crypto_spawn_skcipher_v2(
+	struct crypto_skcipher_spawn_v2 *spawn)
+{
+	return crypto_spawn_tfm2_v2(&spawn->base);
 }
 
 static inline void crypto_skcipher_set_reqsize(
@@ -139,6 +202,8 @@ int crypto_register_skciphers(struct skcipher_alg *algs, int count);
 void crypto_unregister_skciphers(struct skcipher_alg *algs, int count);
 int skcipher_register_instance(struct crypto_template *tmpl,
 			       struct skcipher_instance *inst);
+int skcipher_register_instance_v2(struct crypto_template *tmpl,
+			   struct skcipher_instance_v2 *inst);
 
 int skcipher_walk_done(struct skcipher_walk *walk, int err);
 int skcipher_walk_virt(struct skcipher_walk *walk,
@@ -205,6 +270,29 @@ static inline unsigned int crypto_skcipher_alg_max_keysize(
 		return alg->base.cra_ablkcipher.max_keysize;
 
 	return alg->max_keysize;
+}
+
+/* Helpers for simple block cipher modes of operation */
+struct skcipher_ctx_simple {
+	struct crypto_cipher *cipher;	/* underlying block cipher */
+};
+static inline struct crypto_cipher *
+skcipher_cipher_simple(struct crypto_skcipher *tfm)
+{
+	struct skcipher_ctx_simple *ctx = crypto_skcipher_ctx(tfm);
+
+	return ctx->cipher;
+}
+
+struct skcipher_instance_v2 *skcipher_alloc_instance_simple(
+	struct crypto_template *tmpl, struct rtattr **tb);
+
+static inline struct crypto_alg *skcipher_ialg_simple(
+	struct skcipher_instance_v2 *inst)
+{
+	struct crypto_cipher_spawn_v2 *spawn = skcipher_instance_ctx_v2(inst);
+
+	return crypto_spawn_cipher_alg_v2(spawn);
 }
 
 #endif	/* _CRYPTO_INTERNAL_SKCIPHER_H */

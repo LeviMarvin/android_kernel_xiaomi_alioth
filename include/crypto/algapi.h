@@ -29,6 +29,7 @@
 
 struct crypto_aead;
 struct crypto_instance;
+struct crypto_instance_v2;
 struct module;
 struct rtattr;
 struct seq_file;
@@ -57,6 +58,21 @@ struct crypto_instance {
 	void *__ctx[] CRYPTO_MINALIGN_ATTR;
 };
 
+struct crypto_instance_v2 {
+	struct crypto_alg alg;
+
+	struct crypto_template *tmpl;
+
+	union {
+		/* Node in list of instances after registration. */
+		struct hlist_node list;
+		/* List of attached spawns before registration. */
+		struct crypto_spawn_v2 *spawns;
+	};
+
+	void *__ctx[] CRYPTO_MINALIGN_ATTR;
+};
+
 struct crypto_template {
 	struct list_head list;
 	struct hlist_head instances;
@@ -75,6 +91,21 @@ struct crypto_spawn {
 	struct crypto_instance *inst;
 	const struct crypto_type *frontend;
 	u32 mask;
+};
+
+struct crypto_spawn_v2 {
+	struct list_head list;
+	struct crypto_alg *alg;
+	union {
+		/* Back pointer to instance after registration.*/
+		struct crypto_instance_v2 *inst;
+		/* Spawn list pointer prior to registration. */
+		struct crypto_spawn_v2 *next;
+	};
+	const struct crypto_type *frontend;
+	u32 mask;
+	bool dead;
+	bool registered;
 };
 
 struct crypto_queue {
@@ -143,11 +174,15 @@ extern const struct crypto_type crypto_blkcipher_type;
 void crypto_mod_put(struct crypto_alg *alg);
 
 int crypto_register_template(struct crypto_template *tmpl);
+int crypto_register_templates(struct crypto_template *tmpls, int count);
 void crypto_unregister_template(struct crypto_template *tmpl);
+void crypto_unregister_templates(struct crypto_template *tmpls, int count);
 struct crypto_template *crypto_lookup_template(const char *name);
 
 int crypto_register_instance(struct crypto_template *tmpl,
 			     struct crypto_instance *inst);
+int crypto_register_instance_v2(struct crypto_template *tmpl,
+			     struct crypto_instance_v2 *inst);
 int crypto_unregister_instance(struct crypto_instance *inst);
 
 int crypto_init_spawn(struct crypto_spawn *spawn, struct crypto_alg *alg,
@@ -157,11 +192,17 @@ int crypto_init_spawn2(struct crypto_spawn *spawn, struct crypto_alg *alg,
 		       const struct crypto_type *frontend);
 int crypto_grab_spawn(struct crypto_spawn *spawn, const char *name,
 		      u32 type, u32 mask);
+int crypto_grab_spawn_v2(struct crypto_spawn_v2 *spawn, struct crypto_instance_v2 *inst,
+		      const char *name, u32 type, u32 mask);
 
 void crypto_drop_spawn(struct crypto_spawn *spawn);
+void crypto_drop_spawn_v2(struct crypto_spawn_v2 *spawn);
 struct crypto_tfm *crypto_spawn_tfm(struct crypto_spawn *spawn, u32 type,
 				    u32 mask);
+struct crypto_tfm *crypto_spawn_tfm_v2(struct crypto_spawn_v2 *spawn, u32 type,
+				    u32 mask);
 void *crypto_spawn_tfm2(struct crypto_spawn *spawn);
+void *crypto_spawn_tfm2_v2(struct crypto_spawn_v2 *spawn);
 
 static inline void crypto_set_spawn(struct crypto_spawn *spawn,
 				    struct crypto_instance *inst)
@@ -171,6 +212,7 @@ static inline void crypto_set_spawn(struct crypto_spawn *spawn,
 
 struct crypto_attr_type *crypto_get_attr_type(struct rtattr **tb);
 int crypto_check_attr_type(struct rtattr **tb, u32 type);
+int crypto_check_attr_type_v2(struct rtattr **tb, u32 type, u32 *mask_ret);
 const char *crypto_attr_alg_name(struct rtattr *rta);
 struct crypto_alg *crypto_attr_alg2(struct rtattr *rta,
 				    const struct crypto_type *frontend,
@@ -184,6 +226,8 @@ static inline struct crypto_alg *crypto_attr_alg(struct rtattr *rta,
 
 int crypto_attr_u32(struct rtattr *rta, u32 *num);
 int crypto_inst_setname(struct crypto_instance *inst, const char *name,
+			struct crypto_alg *alg);
+int crypto_inst_setname_v2(struct crypto_instance_v2 *inst, const char *name,
 			struct crypto_alg *alg);
 void *crypto_alloc_instance2(const char *name, struct crypto_alg *alg,
 			     unsigned int head);
@@ -272,6 +316,11 @@ static inline struct crypto_instance *crypto_tfm_alg_instance(
 }
 
 static inline void *crypto_instance_ctx(struct crypto_instance *inst)
+{
+	return inst->__ctx;
+}
+
+static inline void *crypto_instance_ctx_v2(struct crypto_instance_v2 *inst)
 {
 	return inst->__ctx;
 }
@@ -392,6 +441,32 @@ static inline int crypto_requires_off(u32 type, u32 mask, u32 off)
 {
 	return (type ^ off) & mask & off;
 }
+
+static inline u32 crypto_requires_off_v2(struct crypto_attr_type *algt, u32 off)
+{
+	return (algt->type ^ off) & algt->mask & off;
+}
+
+/*
+ * When an algorithm uses another algorithm (e.g., if it's an instance of a
+ * template), these are the flags that should always be set on the "outer"
+ * algorithm if any "inner" algorithm has them set.
+ */
+#define CRYPTO_ALG_INHERITED_FLAGS	\
+	(CRYPTO_ALG_ASYNC | CRYPTO_ALG_NEED_FALLBACK |	\
+	 CRYPTO_ALG_ALLOCATES_MEMORY)
+
+/*
+ * Given the type and mask that specify the flags restrictions on a template
+ * instance being created, return the mask that should be passed to
+ * crypto_grab_*() (along with type=0) to honor any request the user made to
+ * have any of the CRYPTO_ALG_INHERITED_FLAGS clear.
+ */
+static inline u32 crypto_algt_inherited_mask(struct crypto_attr_type *algt)
+{
+	return crypto_requires_off_v2(algt, CRYPTO_ALG_INHERITED_FLAGS);
+}
+
 
 /*
  * Returns CRYPTO_ALG_ASYNC if type/mask requires the use of sync algorithms.

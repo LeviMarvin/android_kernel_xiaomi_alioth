@@ -1998,6 +1998,21 @@ config CRYPTO_USER_API_AEAD
 config CRYPTO_HASH_INFO
 	bool
 
+# config CRYPTO_STATS
+#	bool "Crypto usage statistics"
+#	depends on CRYPTO_USER
+#	help
+#	  Enable the gathering of crypto stats.
+#	  This collects data sizes, numbers of requests, and numbers
+#	  of errors processed by:
+#	  - AEAD ciphers (encrypt, decrypt)
+#	  - asymmetric key ciphers (encrypt, decrypt, verify, sign)
+#	  - symmetric key ciphers (encrypt, decrypt)
+#	  - compression algorithms (compress, decompress)
+#	  - hash algorithms (hash)
+#	  - key-agreement protocol primitives (setsecret, generate
+#	    public key, compute shared secret)
+
 source "drivers/crypto/Kconfig"
 source crypto/asymmetric_keys/Kconfig
 source certs/Kconfig

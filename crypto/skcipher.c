@@ -952,6 +952,20 @@ static const struct crypto_type crypto_skcipher_type2 = {
 	.tfmsize = offsetof(struct crypto_skcipher, base),
 };
 
+static const struct crypto_type crypto_skcipher_type3 = {
+	.extsize = crypto_skcipher_extsize,
+	.init_tfm = crypto_skcipher_init_tfm,
+	.free = crypto_skcipher_free_instance,
+#ifdef CONFIG_PROC_FS
+	.show = crypto_skcipher_show,
+#endif
+	.report = crypto_skcipher_report,
+	.maskclear = ~CRYPTO_ALG_TYPE_MASK,
+	.maskset = CRYPTO_ALG_TYPE_BLKCIPHER_MASK,
+	.type = CRYPTO_ALG_TYPE_SKCIPHER,
+	.tfmsize = offsetof(struct crypto_skcipher, base),
+};
+
 int crypto_grab_skcipher(struct crypto_skcipher_spawn *spawn,
 			  const char *name, u32 type, u32 mask)
 {
@@ -959,6 +973,15 @@ int crypto_grab_skcipher(struct crypto_skcipher_spawn *spawn,
 	return crypto_grab_spawn(&spawn->base, name, type, mask);
 }
 EXPORT_SYMBOL_GPL(crypto_grab_skcipher);
+
+int crypto_grab_skcipher_v2(struct crypto_skcipher_spawn_v2 *spawn,
+			 struct crypto_instance_v2 *inst,
+			 const char *name, u32 type, u32 mask)
+{
+	spawn->base.frontend = &crypto_skcipher_type3;
+	return crypto_grab_spawn_v2(&spawn->base, inst, name, type, mask);
+}
+EXPORT_SYMBOL_GPL(crypto_grab_skcipher_v2);
 
 struct crypto_skcipher *crypto_alloc_skcipher(const char *alg_name,
 					      u32 type, u32 mask)
@@ -1078,6 +1101,130 @@ int skcipher_register_instance(struct crypto_template *tmpl,
 	return crypto_register_instance(tmpl, skcipher_crypto_instance(inst));
 }
 EXPORT_SYMBOL_GPL(skcipher_register_instance);
+
+int skcipher_register_instance_v2(struct crypto_template *tmpl,
+			   struct skcipher_instance_v2 *inst)
+{
+	int err;
+
+	if (WARN_ON(!inst->free))
+		return -EINVAL;
+
+	err = skcipher_prepare_alg(&inst->alg);
+	if (err)
+		return err;
+
+	return crypto_register_instance_v2(tmpl, skcipher_crypto_instance_v2(inst));
+}
+EXPORT_SYMBOL_GPL(skcipher_register_instance_v2);
+
+static int skcipher_setkey_simple(struct crypto_skcipher *tfm, const u8 *key,
+				  unsigned int keylen)
+{
+	struct crypto_cipher *cipher = skcipher_cipher_simple(tfm);
+
+	crypto_cipher_clear_flags(cipher, CRYPTO_TFM_REQ_MASK);
+	crypto_cipher_set_flags(cipher, crypto_skcipher_get_flags(tfm) &
+				CRYPTO_TFM_REQ_MASK);
+	return crypto_cipher_setkey(cipher, key, keylen);
+}
+
+static int skcipher_init_tfm_simple(struct crypto_skcipher *tfm)
+{
+	struct skcipher_instance_v2 *inst = skcipher_alg_instance_v2(tfm);
+	struct crypto_cipher_spawn_v2 *spawn = skcipher_instance_ctx_v2(inst);
+	struct skcipher_ctx_simple *ctx = crypto_skcipher_ctx(tfm);
+	struct crypto_cipher *cipher;
+
+	cipher = crypto_spawn_cipher_v2(spawn);
+	if (IS_ERR(cipher))
+		return PTR_ERR(cipher);
+
+	ctx->cipher = cipher;
+	return 0;
+}
+
+static void skcipher_exit_tfm_simple(struct crypto_skcipher *tfm)
+{
+	struct skcipher_ctx_simple *ctx = crypto_skcipher_ctx(tfm);
+
+	crypto_free_cipher(ctx->cipher);
+}
+
+static void skcipher_free_instance_simple(struct skcipher_instance_v2 *inst)
+{
+	crypto_drop_cipher(skcipher_instance_ctx_v2(inst));
+	kfree(inst);
+}
+
+/**
+ * skcipher_alloc_instance_simple - allocate instance of simple block cipher mode
+ *
+ * Allocate an skcipher_instance for a simple block cipher mode of operation,
+ * e.g. cbc or ecb.  The instance context will have just a single crypto_spawn,
+ * that for the underlying cipher.  The {min,max}_keysize, ivsize, blocksize,
+ * alignmask, and priority are set from the underlying cipher but can be
+ * overridden if needed.  The tfm context defaults to skcipher_ctx_simple, and
+ * default ->setkey(), ->init(), and ->exit() methods are installed.
+ *
+ * @tmpl: the template being instantiated
+ * @tb: the template parameters
+ *
+ * Return: a pointer to the new instance, or an ERR_PTR().  The caller still
+ *	   needs to register the instance.
+ */
+struct skcipher_instance_v2 *skcipher_alloc_instance_simple(
+	struct crypto_template *tmpl, struct rtattr **tb)
+{
+	u32 mask;
+	struct skcipher_instance_v2 *inst;
+	struct crypto_cipher_spawn_v2 *spawn;
+	struct crypto_alg *cipher_alg;
+	int err;
+
+	err = crypto_check_attr_type_v2(tb, CRYPTO_ALG_TYPE_SKCIPHER, &mask);
+	if (err)
+		return ERR_PTR(err);
+
+	inst = kzalloc(sizeof(*inst) + sizeof(*spawn), GFP_KERNEL);
+	if (!inst)
+		return ERR_PTR(-ENOMEM);
+	spawn = skcipher_instance_ctx_v2(inst);
+
+	err = crypto_grab_cipher(spawn, skcipher_crypto_instance_v2(inst),
+				 crypto_attr_alg_name(tb[1]), 0, mask);
+	if (err)
+		goto err_free_inst;
+	cipher_alg = crypto_spawn_cipher_alg_v2(spawn);
+
+	err = crypto_inst_setname_v2(skcipher_crypto_instance_v2(inst), tmpl->name,
+				  cipher_alg);
+	if (err)
+		goto err_free_inst;
+
+	inst->free = skcipher_free_instance_simple;
+
+	/* Default algorithm properties, can be overridden */
+	inst->alg.base.cra_blocksize = cipher_alg->cra_blocksize;
+	inst->alg.base.cra_alignmask = cipher_alg->cra_alignmask;
+	inst->alg.base.cra_priority = cipher_alg->cra_priority;
+	inst->alg.min_keysize = cipher_alg->cra_cipher.cia_min_keysize;
+	inst->alg.max_keysize = cipher_alg->cra_cipher.cia_max_keysize;
+	inst->alg.ivsize = cipher_alg->cra_blocksize;
+
+	/* Use skcipher_ctx_simple by default, can be overridden */
+	inst->alg.base.cra_ctxsize = sizeof(struct skcipher_ctx_simple);
+	inst->alg.setkey = skcipher_setkey_simple;
+	inst->alg.init = skcipher_init_tfm_simple;
+	inst->alg.exit = skcipher_exit_tfm_simple;
+
+	return inst;
+
+err_free_inst:
+	skcipher_free_instance_simple(inst);
+	return ERR_PTR(err);
+}
+EXPORT_SYMBOL_GPL(skcipher_alloc_instance_simple);
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Symmetric key cipher type");

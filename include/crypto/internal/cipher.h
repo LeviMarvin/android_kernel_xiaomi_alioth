@@ -13,128 +13,6 @@
 
 #include <crypto/algapi.h>
 
-struct crypto_cipher {
-	struct crypto_tfm base;
-};
-
-/**
- * DOC: Single Block Cipher API
- *
- * The single block cipher API is used with the ciphers of type
- * CRYPTO_ALG_TYPE_CIPHER (listed as type "cipher" in /proc/crypto).
- *
- * Using the single block cipher API calls, operations with the basic cipher
- * primitive can be implemented. These cipher primitives exclude any block
- * chaining operations including IV handling.
- *
- * The purpose of this single block cipher API is to support the implementation
- * of templates or other concepts that only need to perform the cipher operation
- * on one block at a time. Templates invoke the underlying cipher primitive
- * block-wise and process either the input or the output data of these cipher
- * operations.
- */
-
-static inline struct crypto_cipher *__crypto_cipher_cast(struct crypto_tfm *tfm)
-{
-	return (struct crypto_cipher *)tfm;
-}
-
-/**
- * crypto_alloc_cipher() - allocate single block cipher handle
- * @alg_name: is the cra_name / name or cra_driver_name / driver name of the
- *	     single block cipher
- * @type: specifies the type of the cipher
- * @mask: specifies the mask for the cipher
- *
- * Allocate a cipher handle for a single block cipher. The returned struct
- * crypto_cipher is the cipher handle that is required for any subsequent API
- * invocation for that single block cipher.
- *
- * Return: allocated cipher handle in case of success; IS_ERR() is true in case
- *	   of an error, PTR_ERR() returns the error code.
- */
-
-static inline struct crypto_cipher *crypto_alloc_cipher(const char *alg_name,
-							u32 type, u32 mask)
-{
-	type &= ~CRYPTO_ALG_TYPE_MASK;
-	type |= CRYPTO_ALG_TYPE_CIPHER;
-	mask |= CRYPTO_ALG_TYPE_MASK;
-	return __crypto_cipher_cast(crypto_alloc_base(alg_name, type, mask));
-}
-
-static inline struct crypto_tfm *crypto_cipher_tfm(struct crypto_cipher *tfm)
-{
-	return &tfm->base;
-}
-
-/**
- * crypto_free_cipher() - zeroize and free the single block cipher handle
- * @tfm: cipher handle to be freed
- */
-
-static inline void crypto_free_cipher(struct crypto_cipher *tfm)
-{
-	crypto_free_tfm(crypto_cipher_tfm(tfm));
-}
-
-/**
- * crypto_has_cipher() - Search for the availability of a single block cipher
- * @alg_name: is the cra_name / name or cra_driver_name / driver name of the
- *	     single block cipher
- * @type: specifies the type of the cipher
- * @mask: specifies the mask for the cipher
- *
- * Return: true when the single block cipher is known to the kernel crypto API;
- *	   false otherwise
- */
-
-static inline int crypto_has_cipher(const char *alg_name, u32 type, u32 mask)
-{
-	type &= ~CRYPTO_ALG_TYPE_MASK;
-	type |= CRYPTO_ALG_TYPE_CIPHER;
-	mask |= CRYPTO_ALG_TYPE_MASK;
-	return crypto_has_alg(alg_name, type, mask);
-}
-
-/**
- * crypto_cipher_blocksize() - obtain block size for cipher
- * @tfm: cipher handle
- *
- * The block size for the single block cipher referenced with the cipher handle
- * tfm is returned. The caller may use that information to allocate appropriate
- * memory for the data returned by the encryption or decryption operation
- *
- * Return: block size of cipher
- */
-
-static inline unsigned int crypto_cipher_blocksize(struct crypto_cipher *tfm)
-{
-	return crypto_tfm_alg_blocksize(crypto_cipher_tfm(tfm));
-}
-
-static inline unsigned int crypto_cipher_alignmask(struct crypto_cipher *tfm)
-{
-	return crypto_tfm_alg_alignmask(crypto_cipher_tfm(tfm));
-}
-
-static inline u32 crypto_cipher_get_flags(struct crypto_cipher *tfm)
-{
-	return crypto_tfm_get_flags(crypto_cipher_tfm(tfm));
-}
-
-static inline void crypto_cipher_set_flags(struct crypto_cipher *tfm,
-					   u32 flags)
-{
-	crypto_tfm_set_flags(crypto_cipher_tfm(tfm), flags);
-}
-
-static inline void crypto_cipher_clear_flags(struct crypto_cipher *tfm,
-					     u32 flags)
-{
-	crypto_tfm_clear_flags(crypto_cipher_tfm(tfm), flags);
-}
-
 /**
  * crypto_cipher_setkey() - set key for cipher
  * @tfm: cipher handle
@@ -185,19 +63,28 @@ struct crypto_cipher_spawn {
 	struct crypto_spawn base;
 };
 
-static inline int crypto_grab_cipher(struct crypto_cipher_spawn *spawn,
-				     struct crypto_instance *inst,
+struct crypto_cipher_spawn_v2 {
+	struct crypto_spawn_v2 base;
+};
+
+static inline int crypto_grab_cipher(struct crypto_cipher_spawn_v2 *spawn,
+				     struct crypto_instance_v2 *inst,
 				     const char *name, u32 type, u32 mask)
 {
 	type &= ~CRYPTO_ALG_TYPE_MASK;
 	type |= CRYPTO_ALG_TYPE_CIPHER;
 	mask |= CRYPTO_ALG_TYPE_MASK;
-	return crypto_grab_spawn(&spawn->base, inst, name, type, mask);
+	return crypto_grab_spawn_v2(&spawn->base, inst, name, type, mask);
 }
 
 static inline void crypto_drop_cipher(struct crypto_cipher_spawn *spawn)
 {
 	crypto_drop_spawn(&spawn->base);
+}
+
+static inline void crypto_drop_cipher_v2(struct crypto_cipher_spawn_v2 *spawn)
+{
+	crypto_drop_spawn_v2(&spawn->base);
 }
 
 static inline struct crypto_alg *crypto_spawn_cipher_alg(
@@ -206,17 +93,19 @@ static inline struct crypto_alg *crypto_spawn_cipher_alg(
 	return spawn->base.alg;
 }
 
-static inline struct crypto_cipher *crypto_spawn_cipher(
-	struct crypto_cipher_spawn *spawn)
+static inline struct crypto_alg *crypto_spawn_cipher_alg_v2(
+       struct crypto_cipher_spawn_v2 *spawn)
+{
+	return spawn->base.alg;
+}
+
+static inline struct crypto_cipher *crypto_spawn_cipher_v2(
+	struct crypto_cipher_spawn_v2 *spawn)
 {
 	u32 type = CRYPTO_ALG_TYPE_CIPHER;
 	u32 mask = CRYPTO_ALG_TYPE_MASK;
-	return __crypto_cipher_cast(crypto_spawn_tfm(&spawn->base, type, mask));
-}
 
-static inline struct cipher_alg *crypto_cipher_alg(struct crypto_cipher *tfm)
-{
-	return &crypto_cipher_tfm(tfm)->__crt_alg->cra_cipher;
+	return __crypto_cipher_cast(crypto_spawn_tfm_v2(&spawn->base, type, mask));
 }
 
 #endif

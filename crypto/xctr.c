@@ -130,7 +130,7 @@ static int crypto_xctr_crypt(struct skcipher_request *req)
 
 static int crypto_xctr_create(struct crypto_template *tmpl, struct rtattr **tb)
 {
-	struct skcipher_instance *inst;
+	struct skcipher_instance_v2 *inst;
 	struct crypto_alg *alg;
 	int err;
 
@@ -157,7 +157,7 @@ static int crypto_xctr_create(struct crypto_template *tmpl, struct rtattr **tb)
 	inst->alg.encrypt = crypto_xctr_crypt;
 	inst->alg.decrypt = crypto_xctr_crypt;
 
-	err = skcipher_register_instance(tmpl, inst);
+	err = skcipher_register_instance_v2(tmpl, inst);
 	if (err) {
 out_free_inst:
 		inst->free(inst);

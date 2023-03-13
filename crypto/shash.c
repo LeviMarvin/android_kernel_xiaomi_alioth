@@ -476,10 +476,19 @@ int crypto_grab_shash(struct crypto_shash_spawn *spawn,
                       struct crypto_instance *inst,
                       const char *name, u32 type, u32 mask)
 {
-  spawn->base.frontend = &crypto_shash_type;
-  return crypto_grab_spawn(&spawn->base, name, type, mask);
+  	spawn->base.frontend = &crypto_shash_type;
+  	return crypto_grab_spawn(&spawn->base, name, type, mask);
 }
 EXPORT_SYMBOL_GPL(crypto_grab_shash);
+
+int crypto_grab_shash_v2(struct crypto_shash_spawn_v2 *spawn,
+		      struct crypto_instance_v2 *inst,
+		      const char *name, u32 type, u32 mask)
+{
+	spawn->base.frontend = &crypto_shash_type;
+	return crypto_grab_spawn_v2(&spawn->base, inst, name, type, mask);
+}
+EXPORT_SYMBOL_GPL(crypto_grab_shash_v2);
 
 struct crypto_shash *crypto_alloc_shash(const char *alg_name, u32 type,
 					u32 mask)

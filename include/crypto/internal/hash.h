@@ -50,6 +50,10 @@ struct crypto_shash_spawn {
 	struct crypto_spawn base;
 };
 
+struct crypto_shash_spawn_v2 {
+	struct crypto_spawn_v2 base;
+};
+
 extern const struct crypto_type crypto_ahash_type;
 
 int crypto_hash_walk_done(struct crypto_hash_walk *walk, int err);
@@ -105,6 +109,13 @@ int shash_register_instance(struct crypto_template *tmpl,
 			    struct shash_instance *inst);
 void shash_free_instance(struct crypto_instance *inst);
 
+int crypto_grab_shash(struct crypto_shash_spawn *spawn,
+                      struct crypto_instance *inst,
+                      const char *name, u32 type, u32 mask);
+int crypto_grab_shash_v2(struct crypto_shash_spawn_v2 *spawn,
+		      struct crypto_instance_v2 *inst,
+		      const char *name, u32 type, u32 mask);
+
 int crypto_init_shash_spawn(struct crypto_shash_spawn *spawn,
 			    struct shash_alg *alg,
 			    struct crypto_instance *inst);
@@ -114,10 +125,21 @@ static inline void crypto_drop_shash(struct crypto_shash_spawn *spawn)
 	crypto_drop_spawn(&spawn->base);
 }
 
+static inline void crypto_drop_shash_v2(struct crypto_shash_spawn_v2 *spawn)
+{
+	crypto_drop_spawn_v2(&spawn->base);
+}
+
 static inline struct shash_alg *crypto_spawn_shash_alg(
     struct crypto_shash_spawn *spawn)
 {
   return __crypto_shash_alg(spawn->base.alg);
+}
+
+static inline struct shash_alg *crypto_spawn_shash_alg_v2(
+	struct crypto_shash_spawn_v2 *spawn)
+{
+	return __crypto_shash_alg(spawn->base.alg);
 }
 
 struct shash_alg *shash_attr_alg(struct rtattr *rta, u32 type, u32 mask);
@@ -241,6 +263,12 @@ static inline struct crypto_shash *crypto_spawn_shash(
 	struct crypto_shash_spawn *spawn)
 {
 	return crypto_spawn_tfm2(&spawn->base);
+}
+
+static inline struct crypto_shash *crypto_spawn_shash_v2(
+	struct crypto_shash_spawn_v2 *spawn)
+{
+	return crypto_spawn_tfm2_v2(&spawn->base);
 }
 
 static inline void *crypto_shash_ctx_aligned(struct crypto_shash *tfm)
