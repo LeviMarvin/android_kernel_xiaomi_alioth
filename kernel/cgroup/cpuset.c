@@ -2492,7 +2492,7 @@ void cpuset_cpus_allowed(struct task_struct *tsk, struct cpumask *pmask)
 	spin_unlock_irqrestore(&callback_lock, flags);
 }
 
-#if IS_ENABLED(CONFIG_MIHW)
+#if IS_ENABLED(CONFIG_MIHW) && IS_ENABLED(CONFIG_PERF_CRITICAL_RT_TASK)
 /**
  * Allows the child process of the RT or other threads whose affinity has been
  * modified to inherit the affinity of its scheduling group.
