@@ -15,7 +15,7 @@ Please visit Codeberg page for getting the latest download and changes.
 - Linux Upstream: `4.19.y`/`4.19.277`
 - ACK code branch: `android-4.19-stable`/`4.19.277`
     - Extra: `android-trusty-4.19`
-- CLO code tag: `LA.UM.9.12.r1-15200-SMxx50.QSSI13.0`
+- CLO code tag: `LA.UM.9.12.r1-15200.02-SMxx50.0`
 - KernelSU version: **10679** (Updated at 20230313)
 - Xiaomi driver:
     - Millet
@@ -31,15 +31,15 @@ Please visit Codeberg page for getting the latest download and changes.
 
 ## Report an Issue
 **If you want to report an issue to me, please create issues on Codeberg page!**
-You need to provide these informations:
-1. The basic informations about your phone:
+You need to provide these information:
+1. The basic information about your phone:
     - ROM type (like `MIUI`, `AOSP`, etc.)
     - ROM name (like `MIUI 14`, `ArrowOS`, `dotOS`, etc.)
     - Android version (like `11(R)`,`12(S)`,`13(T)`, etc.)
     - Kernel version
         1. Version of the kernel from ROM.
         2. Install version of the kernel.
-2. Issue informations:
+2. Issue information:
     - Type (Choose from: `Auto Reboot`, `Function Lost`, `Other`)
     - Steps to review
     - Kernel log (If you can provide. Like `/proc/kmsg`, `/data/vendor/diag/last_kmsg`, etc.)
