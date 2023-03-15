@@ -1,12 +1,6 @@
 menuconfig MIHW
 	bool "Xiaomi kernel optimization driver code"
 	default n
-	select CAM_RECLAIM
-	select MI_FRAGMENTION
-	select PERF_HELPER
-	select RTMM
-	select SF_BINDER
-	select TASK_DELAY_ACCT
 	---help---
 	  Xiaomi MIUI optimization driver code
 
