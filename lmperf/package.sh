@@ -1,4 +1,5 @@
 #!/bin/bash
+
 export KERNEL_ROOTDIR=`pwd`
 export KERNEL_OUTDIR=${KERNEL_ROOTDIR}/out
 export ANYKERNEL3_ROOTDIR=${KERNEL_ROOTDIR}/lmperf/AnyKernel3
