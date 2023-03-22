@@ -8,6 +8,8 @@
 
 #include "alioth-sm8250.dtsi"
 #include "alioth-sm8250-camera-sensor-mtp.dtsi"
+
+#include "kona-lmperf.dtsi"
 / {
 	model = "Qualcomm Technologies, Inc. xiaomi alioth";
 	compatible = "qcom,kona-mtp", "qcom,kona", "qcom,mtp";

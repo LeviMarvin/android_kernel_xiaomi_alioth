@@ -740,6 +740,7 @@ static int ramoops_probe(struct platform_device *pdev)
 
 		err = ramoops_parse_dt(pdev, pdata);
 		if (err < 0)
+			pr_err("ramoops_parse_dt err!\n");
 			goto fail_out;
 	}
 
@@ -872,6 +873,13 @@ static int ramoops_probe(struct platform_device *pdev)
 		cxt->size, (unsigned long long)cxt->phys_addr,
 		cxt->ecc_info.ecc_size, cxt->ecc_info.block_size);
 
+	pr_info("[+]======== %s ========[+]\n", __func__);
+	pr_info("{cxt}: physical address: 0x%llx, memory size: %lx, record size: %lx, console size: %lx\n",
+		(unsigned long long)cxt->phys_addr, cxt->size, cxt->record_size, cxt->console_size);
+	pr_info("{_GLOBAL_}: memory address: 0x%llx, memory size: %lx, record size: %lx, console size: %lx\n",
+		(unsigned long long)mem_address, mem_size, record_size, ramoops_console_size);
+	pr_info("[+]======== %s ========[+]\n", __func__);
+
 	return 0;
 
 fail_buf:
@@ -989,7 +997,7 @@ static int __init ramoops_memreserve(char *p)
 
 	size = memparse(p, &p) & PAGE_MASK;
 	ramoops_data.mem_size = size;
-	ramoops_data.mem_address = 0xB0000000;
+	ramoops_data.mem_address = 0xb0000000;
 	ramoops_data.console_size = size / 2;
 	ramoops_data.pmsg_size = size / 2;
 	ramoops_data.dump_oops = 1;
