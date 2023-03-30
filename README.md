@@ -16,7 +16,7 @@ Please visit Codeberg page for getting the latest download and changes.
 - ACK code branch: `android-4.19-stable`/`4.19.278`
     - Extra: `android-trusty-4.19`
 - CLO code tag: `LA.UM.9.12.r1-15200.02-SMxx50.0`
-- KernelSU version: **10679**
+- KernelSU version: **10704**
 - CPU Freq: Ondemand
 - Xiaomi drivers.
 - KVM support enabled.
