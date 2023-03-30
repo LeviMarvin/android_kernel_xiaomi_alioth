@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0
 NIC_SELECT = RTL8192U
 
-ccflags-y := -std=gnu89
+ccflags-y := -std=gnu99
 ccflags-y += -O2
 
 ccflags-y += -DCONFIG_FORCE_HARD_FLOAT=y
