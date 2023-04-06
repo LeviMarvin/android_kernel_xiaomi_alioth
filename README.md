@@ -12,21 +12,20 @@ Please visit Codeberg page for getting the latest download and changes.
 - [Gitlab](https://gitlab.com/lmperf/kernel/alioth)
 
 ## Feature
-- Linux Upstream: `4.19.y`/`4.19.278`
-- ACK code branch: `android-4.19-stable`/`4.19.278`
+- Linux Upstream: `4.19.y`/`4.19.280`
+- ACK code branch: `android-4.19-stable`/`4.19.279`
     - Extra: `android-trusty-4.19`
 - CLO code tag: `LA.UM.9.12.r1-15200.02-SMxx50.0`
-- KernelSU version: **10679**
+- KernelSU version: **10731**
 - CPU Freq: Ondemand
 - Xiaomi drivers.
-- KVM support enabled.
 
 ## Problem
 - None for now.
 
 ## Install
 ### In Recovery
-**Beforce start, TWRP and the Recovery based on it are recommended.**
+**Before start, TWRP and the Recovery based on it are recommended.**
 
 Do not flash dtbo.img file if you are using MIUI.
 
@@ -43,3 +42,9 @@ and download `Image` file from the latest release.
 3. Copy and replace `Image`/`kernel` file (with same name) to unpacked `boot.img` directory.
 4. Repack the `boot.img` file with replaced kernel file.
 5. Reboot into Bootloader mode, flash boot.img to the boot partition of your phone.
+
+## BUG Report
+Please go to the Codeberg page.
+
+The issue which issued on Github maybe not be solved at time.
+
